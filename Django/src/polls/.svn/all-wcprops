@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/DjangoDir/!svn/ver/4/FirstDjango/src/polls
+END
+admin.py
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/DjangoDir/!svn/ver/4/FirstDjango/src/polls/admin.py
+END
+views.py
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/DjangoDir/!svn/ver/4/FirstDjango/src/polls/views.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/DjangoDir/!svn/ver/4/FirstDjango/src/polls/__init__.py
+END
+tests.py
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/DjangoDir/!svn/ver/4/FirstDjango/src/polls/tests.py
+END
+models.py
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/DjangoDir/!svn/ver/4/FirstDjango/src/polls/models.py
+END
