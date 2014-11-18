@@ -65,7 +65,7 @@ DATABASES = {
         'NAME': 'TsinghuaCloud',
         'USER': 'root',
         'PASSWORD': 'tsinghua',
-        'HOST': 'localhost',
+        'HOST': '166.111.143.241',
     }
 }
 
