@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'TsinghuaCloudStorage',
     'TsinghuaCloudMonitor',
     'TsinghuaCloudIndex',
+    'rest_framework',
 )
 
 MIDDLEWARE_CLASSES = (
