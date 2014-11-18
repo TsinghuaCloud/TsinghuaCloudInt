@@ -66,6 +66,7 @@ DATABASES = {
         'USER': 'root',
         'PASSWORD': 'tsinghua',
         'HOST': '166.111.143.241',
+        #django admin login: tsinghuacloud tsinghua
     }
 }
 
