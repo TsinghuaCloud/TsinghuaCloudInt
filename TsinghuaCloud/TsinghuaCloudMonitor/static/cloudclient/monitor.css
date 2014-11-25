@@ -1,0 +1,62 @@
+table { border-collapse: collapse; }
+label  { position:absolute;left:30%; top:30%; font-size: 30px; font-family: sans-serif;}
+
+th, td {
+  border-left-color: transparent!important;
+}
+
+.last-cell {
+  border-right-color: transparent!important;
+}
+
+.container {
+  outline: 1px solid black;
+  outline-offset: 0px;
+  width: 800px;
+  position:absolute;
+  top:40%;
+  left:20%;
+}
+
+.tabWrap {
+  height: 500px;
+  margin-right: 30px;
+  margin-bottom: 0;
+  overflow: scroll;
+  width: 800px;
+}
+
+.gridtable {
+  color:#333333;
+  font-family: verdana,arial,sans-serif;
+  font-size:11px;
+}
+
+.gridtable th {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #666666;
+  background-color: #dedede;
+  padding: 8px;
+}
+
+.gridtable td {
+  border-width: 1px;
+  padding: 8px;
+  border-style: solid;
+  border-color: #666666;
+  background-color: #ffffff;
+}
+
+.gridtableT { color: red; }
+
+.gridtableT th { border-top-color: transparent; }
+
+.lastRow td {
+  background-color: lightcyan;
+}
+
+div.tabWrap th {
+  border-bottom-color: transparent!important;
+  border-top-color: transparent!important;
+}
