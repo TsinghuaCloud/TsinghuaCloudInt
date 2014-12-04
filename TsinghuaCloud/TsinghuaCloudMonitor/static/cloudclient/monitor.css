@@ -1,5 +1,71 @@
+body{
+  background: #E1e1e1;
+}
+
+#cloud{
+  width: 350px;
+  height: 120px;
+  background: #f2f9fe;
+
+  background: -webkit-linear-gradient(-90deg,#f2f9fe 5%, #d6f0fd 100%);
+
+  -webkit-border-radius: 100px;
+  -moz-border-radius: 100px;
+  border-radius: 100px;
+
+  position: relative;
+
+  margin: 150px auto;
+}
+
+#cloud:before, #cloud:after{
+  content: '';
+  position:absolute;
+  background: #f2f9fe;
+  z-index: -1;
+}
+
+#cloud:after{
+  width: 100px;
+  height: 100px;
+  top: -50px;
+  left:50px;
+
+  -webkit-border-radius: 100px;
+  -moz-border-radius: 100px;
+  border-radius: 100px;
+}
+
+#cloud:before{
+  width: 180px;
+  height: 180px;
+  top: -90px;
+  right: 50px;
+
+  -webkit-border-radius: 200px;
+  -moz-border-radius: 200px;
+  border-radius: 200px;
+}
+
+.shadow {
+  width: 350px;
+  position: absolute;
+  bottom: -10px;
+  background: black;
+  z-index: -1;
+
+  -webkit-box-shadow: 0 0 25px 8px rgba(0,0,0,0.4);
+  -moz-box-shadow: 0 0 25px 8px rgba(0,0,0,0.4);
+  box-shadow: 0 0 25px 8px rgba(0,0,0,0.4);
+
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  border-radius: 50%;
+
+}
+
 table { border-collapse: collapse; }
-label  { position:absolute;left:30%; top:30%; font-size: 30px; font-family: sans-serif;}
+label  { position:absolute;left:35%; top:20%; font-size: 30px; font-family: sans-serif;}
 
 th, td {
   border-left-color: transparent!important;
@@ -12,10 +78,10 @@ th, td {
 .container {
   outline: 1px solid black;
   outline-offset: 0px;
-  width: 635px;
+  width: 1000px;
   position:absolute;
   top:40%;
-  left:20%;
+  left:15%;
 }
 
 .tabWrap {
@@ -23,11 +89,15 @@ th, td {
   margin-right: 30px;
   margin-bottom: 0;
   overflow: scroll;
-  width: 800px;
+  width: 1000px;
+  position:absolute;
+  top:30%;
+  left:15%;
+
 }
 
 .gridtable {
-  color:#333333;
+  color:#101413;
   font-family: verdana,arial,sans-serif;
   font-size:11px;
 }
@@ -36,7 +106,7 @@ th, td {
   border-width: 1px;
   border-style: solid;
   border-color: #666666;
-  background-color: #dedede;
+  background-color: #c7f2f1;
   padding: 8px;
 }
 
@@ -44,7 +114,7 @@ th, td {
   border-width: 1px;
   padding: 8px;
   border-style: solid;
-  border-color: #666666;
+  border-color: #927f61;
   background-color: #ffffff;
 }
 
@@ -60,3 +130,24 @@ div.tabWrap th {
   border-bottom-color: transparent!important;
   border-top-color: transparent!important;
 }
+
+body { font-family: sans-serif; }
+
+#main-menu .nav-bar { list-style:none; margin-top: 40px; }
+#main-menu .nav-bar li { display:inline; padding:0 10px; }
+
+#main-menu .nav-bar li a {
+  text-decoration: none;
+  padding-left: 25px;
+  text-transform: uppercase;
+  color: #333;
+	text-shadow: 1px 1px 1px #ccc;
+}
+
+.nav-bar .nav-button-home a { background:url("http://www.cheesetoast.co.uk/cheesepress/wp-content/uploads/2012/08/home.gif") no-repeat 0px -2px transparent; }
+
+.nav-bar .nav-button-services a { background:url("http://www.cheesetoast.co.uk/cheesepress/wp-content/uploads/2012/08/services.gif") no-repeat 0px -2px transparent; }
+
+.nav-bar .nav-button-products a { background:url("http://www.cheesetoast.co.uk/cheesepress/wp-content/uploads/2012/08/products.gif") no-repeat 0px -2px transparent; }
+
+/* Icons courtesy of Thom : http://pixelb.in/assorted-pixel-perfect-14px-icon-set-286/ */

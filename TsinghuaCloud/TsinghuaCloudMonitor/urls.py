@@ -2,10 +2,12 @@ from django.conf.urls import patterns, url
 from TsinghuaCloudMonitor import views
 
 urlpatterns = patterns('',
-    url(r'^homepage/$', views.homepage, name='homepage'),
-    url(r'^register/$', views.register, name='register'),
-    url(r'^login/$', views.login, name='login'),
-    url(r'^monitor/$', views.monitor, name='monitor'),
-    url(r'^database/$', views.database, name='monitor'),
+    
+    url(r'^monitor/hostdetail/$', views.hostdetail, name='hostdetail'),
+    url(r'^hoststatus/$', views.hoststatus, name='hoststatus'),
+    url(r'^hostdetail/([0-9]+)/$', views.hostdetail, name='hostdetail'),
+    url(r'^hostdetailmore/([0-9]+)/$', views.hostdetailmore, name='hostdetailmore'),
+
+
 
 )

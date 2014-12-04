@@ -2,7 +2,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from TsinghuaCloudMonitor.models import User
+from TsinghuaCloudMonitor.models import Service
+from TsinghuaCloudMonitor.models import HostStatus
+from TsinghuaCloudMonitor.models import Host
 from django.template.defaulttags import csrf_token
+from django.db.models import Count, Max
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 
@@ -14,8 +18,35 @@ def homepage(request):
 	
     
 def monitor(request):
-    return render(request,'TsinghuaCloudMonitor/monitor.html')
+    maxservice=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck'))
+    service = []
+    for k in range(0,len(maxservice)):
+        temp = Service.objects.filter(HostName=maxservice[k].get('HostName'),ServiceName=    maxservice[k].get('ServiceName'),LastCheck=maxservice[k].get('max'))
+        for i in range(0,len(temp)):
+            service.append(temp[i])
+            print temp[i]
+    return render(request,'TsinghuaCloudMonitor/monitor.html',{'service':service})     
+    
+def hoststatus(request):
+    host=HostStatus.objects.all()
+    return render(request,'TsinghuaCloudMonitor/hoststatus.html',{'host':host,})
 
+def hostdetail(request,serviceid):
+    service = get_object_or_404(Service, pk=serviceid)
+    print service.HostName
+    host = get_object_or_404(Host, HostName=service.HostName)
+    if host:
+        return render_to_response('TsinghuaCloudMonitor/hostdetail.html', {'host': host})
+    else:
+        return HttpResponse("ERROR")
+ 
+def hostdetailmore(request,hostid):
+    hoststatus = get_object_or_404(HostStatus, pk=hostid)
+    host = get_object_or_404(Host, HostName=hoststatus.HostName)
+    print host.HostName
+    return render_to_response('TsinghuaCloudMonitor/hostdetailmore.html', {'host': host})
+     
+    
 def login(request): 
     errors= []  
     account=None  
@@ -79,7 +110,4 @@ def alogout(request):
     logout(request)  
     return HttpResponseRedirect('/index') 
     
-def database(request):
-    
-    user=User.objects.all();
-    return render(request,'TsinghuaCloudMonitor/database.html',{'user':user})     
+  
