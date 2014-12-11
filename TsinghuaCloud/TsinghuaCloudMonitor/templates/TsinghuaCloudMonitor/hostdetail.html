@@ -1,0 +1,398 @@
+{% load staticfiles %}
+<script src="{% static 'cloudclient/jquery-2.1.1.js'%}"></script>
+
+
+<link rel="stylesheet" type="text/css" href="{% static 'cloudclient/monitor.css' %}">
+
+
+<a href="/monitor">back</a>
+<label>Host Details And Services Charts</label>
+
+
+  <table class="gridtable" style="position:absolute;top:30%;left:23%;width:800px;">
+    <thead>
+      <tr>
+        <th class='detail'>Host</th>
+        <th>IP</th>
+        <th>Owner</th>
+        <th>Info</th>
+                
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+        <td class='detail'>{{host.HostName}}</td>
+        <td class='detail'>{{host.IP}}</td>
+        <td class='detail'>{{host.Owner}}</td>
+        <td class='detail'>{{host.Info}}</td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<div id="main" style="height:400px;width:900px;position:absolute;top:50%;left:20%"></div>
+<!-- ECharts单文件引入 -->
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+<script type="text/javascript">
+        // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            }
+        });
+// 使用
+        require(
+            [
+                'echarts',
+                'echarts/chart/line' // 使用柱状图就加载bar模块，按需加载
+               
+            ],
+            function (ec) {
+                // 基于准备好的dom，初始化echarts图表
+                var myChart = ec.init(document.getElementById('main')); 
+                var option = {
+    title : {
+        text: 'Memeory Usage Data',
+        subtext: 'Host'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:['Used']
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : false,
+            data : ['','','','','','','','','','']
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} KB'
+            },
+            scale:true
+        }
+    ],
+    series : [
+                {
+            name:'Used',
+            type:'line',
+            data:[{{memory_used.0}},{{memory_used.1}},{{memory_used.2}},{{memory_used.3}},{{memory_used.4}},{{memory_used.5}},{{memory_used.6}},{{memory_used.7}},{{memory_used.8}},{{memory_used.9}}],
+            
+            markLine : {
+                data : [
+                    {type : 'average', name : '平均值'}
+                ]
+            }
+        },
+                
+    ]
+};
+                    
+                // 为echarts对象加载数据 
+                myChart.setOption(option); 
+            }
+        );
+
+</script>
+
+<div id="cpuload" style="height:400px;width:900px;position:absolute;top:98%;left:20%"></div>
+<!-- ECharts单文件引入 -->
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+<script type="text/javascript">
+ $(function () {
+var csrftoken = getCookie('csrftoken'); 
+
+  
+  
+    $.ajaxSetup({
+        crossDomain: false, // obviates need for sameOrigin test
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type)) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+    // END DJANGO AJAX
+   
+});
+       // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            }
+        });
+// 使用
+        require(
+            [
+                'echarts',
+                'echarts/chart/line' // 使用柱状图就加载bar模块，按需加载
+               
+            ],
+            function (ec) {
+                // 基于准备好的dom，初始化echarts图表
+                var myChart = ec.init(document.getElementById('cpuload')); 
+                var option = {
+    title : {
+        text: 'CPU Load Data',
+        subtext: 'Host'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:['1 minute','5 minutes']
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : false,
+            data : ['','','','','','']
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} '
+            },
+            scale:true
+        }
+    ],
+    series : [
+        {
+            name:'Average in 1 minute',
+            type:'line',
+            data:[{{cpu_one.0}},{{cpu_one.1}},{{cpu_one.2}},{{cpu_one.3}},{{cpu_one.4}},{{cpu_one.5}}],
+            markPoint : {
+                data : [
+                    {type : 'max', name: '最大值'},
+                    {type : 'min', name: '最小值'}
+                ]
+            },
+            markLine : {
+                data : [
+                    {type : 'average', name: '平均值'}
+                ]
+            }
+        },
+        {
+            name:'Average in 5 minutes',
+            type:'line',
+            data:[{{cpu_five.0}},{{cpu_five.1}},{{cpu_five.2}},{{cpu_five.3}},{{cpu_five.4}},{{cpu_five.5}}],
+            
+            markLine : {
+                data : [
+                    {type : 'average', name : '平均值'}
+                ]
+            }
+        },
+                
+    ]
+};
+                    
+                // 为echarts对象加载数据 
+                myChart.setOption(option); 
+            }
+        );
+
+</script>
+
+
+<div id="disk" style="height:400px;width:900px;position:absolute;top:150%;left:20%"></div>
+<!-- ECharts单文件引入 -->
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+<script type="text/javascript">
+        // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            }
+        });
+// 使用
+        require(
+            [
+                'echarts',
+                'echarts/chart/line' // 使用柱状图就加载bar模块，按需加载
+               
+            ],
+            function (ec) {
+                // 基于准备好的dom，初始化echarts图表
+                var myChart = ec.init(document.getElementById('disk')); 
+                var option = {
+    title : {
+        text: 'Disk Usage Data',
+        subtext: 'Host'
+    },
+    color : [ 
+    '#6495ed','#87cefa', '#da70d6', '#32cd32', '#6495ed', 
+    '#ff69b4', '#ba55d3', '#cd5c5c', '#ffa500', '#40e0d0', 
+    '#1e90ff', '#ff6347', '#7b68ee', '#00fa9a', '#ffd700', 
+    '#6b8e23', '#ff00ff', '#3cb371', '#b8860b', '#30e0e0' 
+],
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:['Used']
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : false,
+            data : ['','','','','','','','','','']
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} MB'
+            },
+            scale:true
+        }
+    ],
+    series : [
+                {
+            name:'Used',
+            type:'line',
+            data:[{{diskuse.0}},{{diskuse.1}},{{diskuse.2}},{{diskuse.3}},{{diskuse.4}},{{diskuse.5}},{{diskuse.6}},{{diskuse.7}},{{diskuse.8}},{{diskuse.9}}],
+            
+            markLine : {
+                data : [
+                    {type : 'average', name : '平均值'}
+                ]
+            }
+        },
+                
+    ]
+};
+                    
+                // 为echarts对象加载数据 
+                myChart.setOption(option); 
+            }
+        );
+
+</script>
+
+
+<div id="process" style="height:400px;width:900px;position:absolute;top:200%;left:20%"></div>
+<!-- ECharts单文件引入 -->
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+<script type="text/javascript">
+        // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            }
+        });
+// 使用
+        require(
+            [
+                'echarts',
+                'echarts/chart/line' // 使用柱状图就加载bar模块，按需加载
+               
+            ],
+            function (ec) {
+                // 基于准备好的dom，初始化echarts图表
+                var myChart = ec.init(document.getElementById('process')); 
+                var option = {
+    title : {
+        text: 'Process Amount',
+        subtext: 'Host'
+    },
+    color : [ 
+    '#FF0080'],
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:['Number']
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : false,
+            data : ['','','','','','','','','','','','','','','','']
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value}'
+            },
+            scale:true
+        }
+    ],
+    series : [
+                {
+            name:'Used',
+            type:'line',
+            data:[{{pro.1}},{{pro.1}},{{pro.2}},{{pro.3}},{{pro.4}},{{pro.5}},{{pro.6}},{{pro.7}},{{pro.8}},{{pro.9}},{{pro.10}},{{pro.11}},{{pro.12}},{{pro.13}},{{pro.14}},{{pro.15}}],
+            
+            markLine : {
+                data : [
+                    {type : 'average', name : '平均值'}
+                ]
+            }
+        },
+                
+    ]
+};
+                    
+                // 为echarts对象加载数据 
+                myChart.setOption(option); 
+            }
+        );
+
+</script>

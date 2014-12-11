@@ -1,0 +1,52 @@
+{% csrf_token %}
+{% load staticfiles %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+<link rel="stylesheet" type="text/css" href="{% static 'cloudclient/homepage.css' %}">
+<script>
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+// DONE DJANGO HACK
+
+</script>
+<div class="login">
+  <h1>PLEASE LOG UP A NEW ACCOUNT.</h1>
+  <form action="" method="post">
+    <p><input type="text" name="account" value="" placeholder="Username"></p>
+    <p><input type="password" name="password" value="" placeholder="Password"></p>
+    <p><input type="password" name="password2" value="" placeholder="Password Again"></p>
+
+    <p class="remember_me">
+      <label>
+        <input type="checkbox" name="remember_me" id="remember_me">
+        Remember me 
+      </label>
+    </p>
+    <p class="submit"><input type="submit"  name="commit" value="LOG IN"></p>
+  </form>
+  {% if errors %}
+        <ul>
+            {% for error in errors %}
+            <li style="color: red;">{{error}}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+</div>

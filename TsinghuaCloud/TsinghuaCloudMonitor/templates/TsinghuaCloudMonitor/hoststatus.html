@@ -1,0 +1,97 @@
+{% csrf_token %}
+{% load staticfiles %}
+<script src="{% static 'cloudclient/jquery-2.1.1.js'%}"></script>
+
+
+<link rel="stylesheet" type="text/css" href="{% static 'cloudclient/monitor.css' %}">
+<script>
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+// DONE DJANGO HACK
+
+function get_site_prefix(){
+    var href = $(location).attr("href");
+    return href
+}
+
+
+
+
+$(function () {
+var csrftoken = getCookie('csrftoken'); 
+
+  
+  
+    $.ajaxSetup({
+        crossDomain: false, // obviates need for sameOrigin test
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type)) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+    // END DJANGO AJAX
+   
+});
+
+
+
+</script>
+
+<body>
+ 
+<nav id="main-menu">
+     <ul class="nav-bar">
+          <li class="nav-button-home"><a href="/homepage">Home</a></li>
+          <li class="nav-button-services"><a href="/monitor">Services</a></li>
+          <li class="nav-button-products"><a href="/hoststatus">Hosts</a></li>
+     </ul>
+</nav>
+
+<label> Status Details For All Hosts</label>
+
+<div class="tabWrap">
+  <table class="gridtable">
+    <thead>
+      <tr>
+        <th class='detail'>Host</th>
+        <th style='width:200px'> LastCheck </th>
+        <th style='width:350px'>PluginOutput</th>
+        <th style='width:400px'>PerformanceData </th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+        {% for host in host %}
+        <tr>
+        <td class='detail'><a href="{% url 'hostdetailmore' host.id%}">{{host.HostName}}</a></td>
+        <td>{{host.LastCheck}}</td>
+        <td>{{host.PluginOutput}}</td>
+        <td>{{host.PerformanceData}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+</body>
+
