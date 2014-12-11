@@ -10,6 +10,7 @@ from django.db.models import Count, Max
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 import re
+import time
 
 import json
 # Create your views here.
@@ -27,6 +28,12 @@ def monitor(request):
             service.append(temp[i])
             print temp[i]
     return render(request,'TsinghuaCloudMonitor/monitor.html',{'service':service})     
+
+def timestamp_datetime(value):
+    format = '%Y-%m-%d %H:%M:%S'
+    value = time.localtime(value)
+    dt = time.strftime(format, value)
+    return dt
     
 def hoststatus(request):
     host=HostStatus.objects.all()
@@ -40,28 +47,34 @@ def hostdetail(request,serviceid):
     p = re.compile(r'\d+')
     memory_total= []
     memory_used = []
+    memory_timestamp = []
     for k in range(len(memory)-1,0,-1):
         memory_total.append(p.findall(memory[k].PerformanceData)[0])
         if k==(len(memory)-1):
            memory_used.append(p.findall(memory[k].PerformanceData)[1])
+           memory_timestamp.append(timestamp_datetime(float(memory[k].LastCheck)))
         else: 
            if p.findall(memory[k].PerformanceData)[1]!=p.findall(memory[k+1].PerformanceData)[1]:
               memory_used.append(p.findall(memory[k].PerformanceData)[1])
+              memory_timestamp.append(timestamp_datetime(float(memory[k].LastCheck)))
         
     print memory_used
+    print memory_timestamp
     cpuload = Service.objects.filter(HostName=service.HostName, ServiceName='cpuload')
     p = re.compile(r'(\d+)\.(\d*)')
     cpu_one= []
     cpu_five = []
+    cpu_timestamp = []
     for k in range(len(cpuload)-1,0,-1):
         if k==(len(cpuload)-1):
            cpu_one.append('.'.join(p.findall(cpuload[k].PerformanceData)[0]))
            cpu_five.append('.'.join(p.findall(cpuload[k].PerformanceData)[3]))
+           cpu_timestamp.append(timestamp_datetime(float(cpuload[k].LastCheck)))
         else: 
            if '.'.join(p.findall(cpuload[k].PerformanceData)[0])!='.'.join(p.findall(cpuload[k+1].PerformanceData)[0]):
               cpu_one.append('.'.join(p.findall(cpuload[k].PerformanceData)[0]))
               cpu_five.append('.'.join(p.findall(cpuload[k].PerformanceData)[3]))
-
+              cpu_timestamp.append(timestamp_datetime(float(cpuload[k].LastCheck)))
         
     print cpu_one
     print cpu_five
@@ -86,7 +99,7 @@ def hostdetail(request,serviceid):
         
     print pro
     if host:
-        return render_to_response('TsinghuaCloudMonitor/hostdetail.html', {'host': host,'memory_total':memory_total,'memory_used':memory_used,'cpu_one':cpu_one,'cpu_five':cpu_five,'diskuse':diskuse,'pro':pro })
+        return render_to_response('TsinghuaCloudMonitor/hostdetail.html', {'host': host,'memory_total':memory_total,'memory_used':memory_used,'memory_timestamp':memory_timestamp,'cpu_one':cpu_one,'cpu_five':cpu_five,'cpu_timestamp':cpu_timestamp,'diskuse':diskuse,'pro':pro })
     else:
         return HttpResponse("ERROR")
  
