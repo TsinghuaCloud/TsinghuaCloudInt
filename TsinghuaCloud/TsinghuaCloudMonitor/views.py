@@ -9,6 +9,7 @@ from django.template.defaulttags import csrf_token
 from django.db.models import Count, Max
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
+import re
 
 import json
 # Create your views here.
@@ -35,10 +36,60 @@ def hostdetail(request,serviceid):
     service = get_object_or_404(Service, pk=serviceid)
     print service.HostName
     host = get_object_or_404(Host, HostName=service.HostName)
+    memory = Service.objects.filter(HostName=service.HostName, ServiceName='MemoryUsage')
+    p = re.compile(r'\d+')
+    memory_total= []
+    memory_used = []
+    for k in range(len(memory)-1,0,-1):
+        memory_total.append(p.findall(memory[k].PerformanceData)[0])
+        if k==(len(memory)-1):
+           memory_used.append(p.findall(memory[k].PerformanceData)[1])
+        else: 
+           if p.findall(memory[k].PerformanceData)[1]!=p.findall(memory[k+1].PerformanceData)[1]:
+              memory_used.append(p.findall(memory[k].PerformanceData)[1])
+        
+    print memory_used
+    cpuload = Service.objects.filter(HostName=service.HostName, ServiceName='cpuload')
+    p = re.compile(r'(\d+)\.(\d*)')
+    cpu_one= []
+    cpu_five = []
+    for k in range(len(cpuload)-1,0,-1):
+        if k==(len(cpuload)-1):
+           cpu_one.append('.'.join(p.findall(cpuload[k].PerformanceData)[0]))
+           cpu_five.append('.'.join(p.findall(cpuload[k].PerformanceData)[3]))
+        else: 
+           if '.'.join(p.findall(cpuload[k].PerformanceData)[0])!='.'.join(p.findall(cpuload[k+1].PerformanceData)[0]):
+              cpu_one.append('.'.join(p.findall(cpuload[k].PerformanceData)[0]))
+              cpu_five.append('.'.join(p.findall(cpuload[k].PerformanceData)[3]))
+
+        
+    print cpu_one
+    print cpu_five
+    
+    disk = Service.objects.filter(HostName=service.HostName, ServiceName='disk')
+    p = re.compile(r'\d+')
+    diskuse= []
+    for k in range(len(disk)-1,0,-1):
+        if k==(len(disk)-1):
+           diskuse.append(p.findall(disk[k].PerformanceData)[0])
+        else: 
+           if p.findall(disk[k].PerformanceData)[0]!=p.findall(disk[k+1].PerformanceData)[0]:
+              diskuse.append(p.findall(disk[k].PerformanceData)[0])
+        
+    print diskuse
+    
+    process = Service.objects.filter(HostName=service.HostName, ServiceName='total-procs')
+    p = re.compile(r'\d+')
+    pro = []
+    for k in range(len(process)-1,0,-1):
+          pro.append(p.findall(process[k].PerformanceData)[0])
+        
+    print pro
     if host:
-        return render_to_response('TsinghuaCloudMonitor/hostdetail.html', {'host': host})
+        return render_to_response('TsinghuaCloudMonitor/hostdetail.html', {'host': host,'memory_total':memory_total,'memory_used':memory_used,'cpu_one':cpu_one,'cpu_five':cpu_five,'diskuse':diskuse,'pro':pro })
     else:
         return HttpResponse("ERROR")
+ 
  
 def hostdetailmore(request,hostid):
     hoststatus = get_object_or_404(HostStatus, pk=hostid)
