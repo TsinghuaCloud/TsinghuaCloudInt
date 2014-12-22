@@ -1,9 +1,6 @@
 {% csrf_token %}
 {% load staticfiles %}
-<script src="{% static 'cloudclient/jquery-2.1.1.js'%}"></script>
 
-
-<link rel="stylesheet" type="text/css" href="{% static 'cloudclient/monitor.css' %}">
 <script>
 function getCookie(name) {
     var cookieValue = null;
@@ -37,10 +34,70 @@ function cache_clear()
     window.location.reload(true);
     alert('refresh');
 }
-  
 
-
-
+function doSearch(){
+    var prefix= get_site_prefix();
+    $.ajax({
+        type: "POST",
+        url: prefix + "doSearch/", 
+        data: { 
+            service: $('#itemid').val(),
+            host: $('#productid').val(),
+        },
+	});
+}
+/**
+        * EasyUI DataGrid根据字段动态合并单元格
+        * @param fldList 要合并table的id
+        * @param fldList 要合并的列,用逗号分隔(例如："name,department,office");
+        */
+        function MergeCells(tableID, fldList) {
+            
+            var Arr = fldList.split(",");
+            var dg = $('#' + tableID);
+            var fldName;
+            var RowCount = dg.datagrid("getRows").length;
+            var span;
+            var PerValue = "";
+            var CurValue = "";
+            var length = Arr.length - 1;
+            for (i = length; i >= 0; i--) {
+                fldName = Arr[i];
+                PerValue = "";
+                span = 1;
+                for (row = 0; row <= RowCount; row++) {
+                    if (row == RowCount) {
+                        CurValue = "";
+                    }
+                    else {
+                        CurValue1 = dg.datagrid("getRows")[row][fldName].split('>');
+                        CurValue = CurValue1[1];
+                 
+                        
+                        
+                    }
+                    if (PerValue == CurValue) {
+                        span += 1;
+                    }
+                    else {
+                        var index = row - span;
+                        dg.datagrid('mergeCells', {
+                            index: index,
+                            field: fldName,
+                            rowspan: span,
+                            colspan: null
+                        });
+                        span = 1;
+                        PerValue = CurValue;
+                    }
+                }
+            }
+             $('.datagrid-td-merged').find('a').css('font-size','15px');
+             $('.datagrid-td-merged').css('background-color','#FFFFF0'); 
+             
+             
+         }
+        
 $(function () {
 var csrftoken = getCookie('csrftoken'); 
     $(document).ready(function(){
@@ -56,51 +113,65 @@ var csrftoken = getCookie('csrftoken');
         }
     });
     // END DJANGO AJAX
-   
+  
+          
 });
 
 
 
 </script>
 
-<body>
- 
-<nav id="main-menu">
-     <ul class="nav-bar">
-          <li class="nav-button-home"><a href="/homepage">Home</a></li>
-          <li class="nav-button-services"><a href="/monitor">Services</a></li>
-          <li class="nav-button-products"><a href="/hoststatus">Hosts</a></li>
-     </ul>
-</nav>
 
-<label>Service Status Details For All Hosts</label>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Basic Panel - jQuery EasyUI Demo</title>
+<script src="{% static 'jquery-easyui-1/jquery.min.js'%}"></script>
+<script src="{% static 'jquery-easyui-1/jquery.easyui.min.js'%}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'cloudclient/monitor.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/icon.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/default/easyui.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/demo/demo.css' %}">
+</head>
 
-<div class="tabWrap">
-  <table class="gridtable">
-    <thead>
-      <tr>
-        <th class='detail'>Host</th>
-        <th style='width:200px'>Service</th>
-        <th style='width:200px'> LastCheck </th>
-        <th style='width:350px'>PluginOutput</th>
-        <th style='width:400px'>PerformanceData </th>
-        
-        
-      </tr>
-    </thead>
-    <tbody>
-        {% for service in service %}
-        <tr>
-        <td class='detail'><a href="{% url 'hostdetail' service.id%}">{{service.HostName}}</a></td>
-        <td>{{service.ServiceName}}</td>
-        <td>{{service.LastCheck}}</td>
-        <td>{{service.PluginOutput}}</td>
-        <td>{{service.PerformanceData}}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-  </table>
-</div>
+<body class="easyui-layout">
+	<div data-options="region:'north',border:false" style="height:60px;font-size:28px;background:#F5F5F5;padding:10px">Tsinghua Cloud Monitor</div>
+	<div data-options="region:'west',split:true,title:'Menu'" style="width:150px;padding:10px;">
+	<a href="/homepage" class="easyui-linkbutton" style="width:130px">Homepage</a>
+	<a href="/monitor" class="easyui-linkbutton" style="width:130px">Services</a>
+	<a href="/hoststatus" class="easyui-linkbutton" style="width:130px">Hosts</a>
+	<a href="/mapchart" class="easyui-linkbutton" style="width:130px">Map</a>
+</div></div>
+	<div data-options="region:'east',split:true,collapsed:true,title:'East'" style="width:100px;padding:10px;">east region</div>
+	<div data-options="region:'south',border:false" style="height:20px;background:#F5F5F5;padding:10px;"></div>
+	<div data-options="region:'center',title:'Monitor'">
+	    
+		<table id='service-table' class="easyui-datagrid" toolbar="#tb"
+					data-options="border:false,singleSelect:true,fit:true,fitColumns:true,onLoadSuccess:function(data){ MergeCells('service-table','itemid');}">
+				<thead>
+					<tr>
+						<th data-options="field:'itemid'" width="50" sortable="true">Host</th>
+						<th data-options="field:'productid'" width="70">Service</th>
+						<th data-options="field:'listprice'" width="30">Status</th>
+						<th data-options="field:'unitcost'" width="80">Last Check</th>
+						<th data-options="field:'attr1'" width="180">Status Information</th>
+						<th data-options="field:'status'" width="200">Performance Data</th>
+					</tr>
+				</thead>
+				<tbody>
+                        {% for service in service %}
+                        <tr>
+                        <td class='detail'><a href="{% url 'hostdetail' service.id%}">{{service.HostName}}</a></td>
+                        <td>{{service.ServiceName}}</td>
+                        <td><span style="color:#3CB371;">OK</span></td>
+                        <td>{{service.LastCheck}}</td>
+                        <td>{{service.PluginOutput}}</td>
+                        <td>{{service.PerformanceData}}</td>
+                        </tr>
+                        {% endfor %}
 
+			</table>
+	</div>
 </body>
-
+</html>

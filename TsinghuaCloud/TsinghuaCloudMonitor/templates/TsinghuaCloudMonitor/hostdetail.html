@@ -1,37 +1,127 @@
 {% load staticfiles %}
-<script src="{% static 'cloudclient/jquery-2.1.1.js'%}"></script>
+{% csrf_token %}
+{% load staticfiles %}
+
+<script>
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+// DONE DJANGO HACK
+
+function get_site_prefix(){
+    var href = $(location).attr("href");
+    return href
+}
+
+function cache_clear()
+    {
+    window.location.reload(true);
+    alert('refresh');
+}
+
+function doSearch(){
+    var prefix= get_site_prefix();
+    $.ajax({
+        type: "POST",
+        url: prefix + "doSearch/", 
+        data: { 
+            service: $('#itemid').val(),
+            host: $('#productid').val(),
+        },
+	});
+}
+        
+$(function () {
+var csrftoken = getCookie('csrftoken'); 
+    $(document).ready(function(){
+     setInterval(function(){cache_clear()},1000000);
+     });
+      
+    $.ajaxSetup({
+        crossDomain: false, // obviates need for sameOrigin test
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type)) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+    // END DJANGO AJAX
+  
+          
+});
 
 
+
+</script>
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Basic Panel - jQuery EasyUI Demo</title>
+<script src="{% static 'jquery-easyui-1/jquery.min.js'%}"></script>
+<script src="{% static 'jquery-easyui-1/jquery.easyui.min.js'%}"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'cloudclient/monitor.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/icon.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/default/easyui.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/demo/demo.css' %}">
+</head>
 
-
-<a href="/monitor">back</a>
-<label>Host Details And Services Charts</label>
-
-
-  <table class="gridtable" style="position:absolute;top:30%;left:23%;width:800px;">
+<body class="easyui-layout">
+	<div data-options="region:'north',border:false" style="height:60px;font-size:28px;background:#F5F5F5;padding:10px">Tsinghua Cloud Monitor</div>
+	<div data-options="region:'west',split:true,title:'Menu'" style="width:150px;padding:10px;">
+	<a href="/homepage" class="easyui-linkbutton" style="width:130px">Homepage</a>
+	<a href="/monitor" class="easyui-linkbutton" style="width:130px">Services</a>
+	<a href="/hoststatus" class="easyui-linkbutton" style="width:130px">Hosts</a>
+	<a href="/mapchart" class="easyui-linkbutton" style="width:130px">Map</a>
+</div>
+    <div data-options="region:'east',split:true" title="Host Detail" style="width:300px;">
+    <table class="easyui-datagrid">
     <thead>
       <tr>
-        <th class='detail'>Host</th>
-        <th>IP</th>
-        <th>Owner</th>
-        <th>Info</th>
+        <th data-options="field:'host'" width="50">Host</th>
+        <th data-options="field:'IP'" width="150">IP</th>
+        <th data-options="field:'Owner'" width="50">Owner</th>
+        <th data-options="field:'Info'" width="50">Info</th>
                 
       </tr>
     </thead>
     <tbody>
         <tr>
-        <td class='detail'>{{host.HostName}}</td>
-        <td class='detail'>{{host.IP}}</td>
-        <td class='detail'>{{host.Owner}}</td>
-        <td class='detail'>{{host.Info}}</td>
+        <td>{{host.HostName}}</td>
+        <td >{{host.IP}}</td>
+        <td >{{host.Owner}}</td>
+        <td >{{host.Info}}</td>
         </tr>
     </tbody>
-  </table>
+  </table>      
+    </div>
+	
+	<div data-options="region:'south',border:false" style="height:20px;background:#F5F5F5;padding:10px;"></div>
+	<div data-options="region:'center',title:'Monitor Charts'">
+	    
+		
 
 
-
-<div id="main" style="height:400px;width:900px;position:absolute;top:50%;left:20%"></div>
+<div id="main" style="height:400px;width:900px;"></div>
 <!-- ECharts单文件引入 -->
 <script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
 <script type="text/javascript">
@@ -77,7 +167,7 @@
         {
             type : 'category',
             boundaryGap : false,
-            data :['{{memory_timestamp.0}}','{{memory_timestamp.1}}','{{memory_timestamp.2}}','{{memory_timestamp.3}}','{{memory_timestamp.4}}','{{memory_timestamp.5}}','{{memory_timestamp.6}}','{{memory_timestamp.7}}','{{memory_timestamp.8}}','{{memory_timestamp.9}}']
+            data :['{{memory_timestamp.19}}','{{memory_timestamp.18}}','{{memory_timestamp.17}}','{{memory_timestamp.16}}','{{memory_timestamp.15}}','{{memory_timestamp.14}}','{{memory_timestamp.13}}','{{memory_timestamp.12}}','{{memory_timestamp.11}}','{{memory_timestamp.10}}','{{memory_timestamp.9}}','{{memory_timestamp.8}}','{{memory_timestamp.7}}','{{memory_timestamp.6}}','{{memory_timestamp.5}}','{{memory_timestamp.4}}','{{memory_timestamp.3}}','{{memory_timestamp.2}}','{{memory_timestamp.1}}','{{memory_timestamp.0}}']
         }
     ],
     yAxis : [
@@ -93,7 +183,7 @@
                 {
             name:'Used',
             type:'line',
-            data:[{{memory_used.0}},{{memory_used.1}},{{memory_used.2}},{{memory_used.3}},{{memory_used.4}},{{memory_used.5}},{{memory_used.6}},{{memory_used.7}},{{memory_used.8}},{{memory_used.9}}],
+            data:[{{memory_used.19}},{{memory_used.18}},{{memory_used.17}},{{memory_used.16}},{{memory_used.15}},{{memory_used.14}},{{memory_used.13}},{{memory_used.12}},{{memory_used.11}},{{memory_used.10}},{{memory_used.9}},{{memory_used.8}},{{memory_used.7}},{{memory_used.6}},{{memory_used.5}},{{memory_used.4}},{{memory_used.3}},{{memory_used.2}},{{memory_used.1}},{{memory_used.0}}],
             
             markLine : {
                 data : [
@@ -112,7 +202,7 @@
 
 </script>
 
-<div id="cpuload" style="height:400px;width:900px;position:absolute;top:98%;left:20%"></div>
+<div id="cpuload" style="height:400px;width:900px;"></div>
 <!-- ECharts单文件引入 -->
 <script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
 <script type="text/javascript">
@@ -226,7 +316,7 @@ var csrftoken = getCookie('csrftoken');
 </script>
 
 
-<div id="disk" style="height:400px;width:900px;position:absolute;top:150%;left:20%"></div>
+<div id="disk" style="height:400px;width:900px;"></div>
 <!-- ECharts单文件引入 -->
 <script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
 <script type="text/javascript">
@@ -314,7 +404,7 @@ var csrftoken = getCookie('csrftoken');
 </script>
 
 
-<div id="process" style="height:400px;width:900px;position:absolute;top:200%;left:20%"></div>
+<div id="process" style="height:400px;width:900px;"></div>
 <!-- ECharts单文件引入 -->
 <script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
 <script type="text/javascript">
@@ -396,3 +486,6 @@ var csrftoken = getCookie('csrftoken');
         );
 
 </script>
+	</div>
+	
+	

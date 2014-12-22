@@ -17,26 +17,53 @@ import json
 
 def homepage(request):
     return render(request,'TsinghuaCloudMonitor/homepage.html')
+
+def mapchart(request):
+    return render(request,'TsinghuaCloudMonitor/mapchart.html')
 	
-    
+def timestamp_datetime(value):
+    format = '%Y-%m-%d %H:%M:%S'
+    value = time.localtime(value)
+    dt = time.strftime(format, value)
+    return dt
+   
 def monitor(request):
     maxservice=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck'))
     service = []
     for k in range(0,len(maxservice)):
         temp = Service.objects.filter(HostName=maxservice[k].get('HostName'),ServiceName=    maxservice[k].get('ServiceName'),LastCheck=maxservice[k].get('max'))
         for i in range(0,len(temp)):
+            temp[i].LastCheck = timestamp_datetime(float(temp[i].LastCheck))
             service.append(temp[i])
-            print temp[i]
+    print service
     return render(request,'TsinghuaCloudMonitor/monitor.html',{'service':service})     
 
-def timestamp_datetime(value):
-    format = '%Y-%m-%d %H:%M:%S'
-    value = time.localtime(value)
-    dt = time.strftime(format, value)
-    return dt
+def doSearch(request):
+    select_service = request.POST.get('service')
+    select_host = request.POST.get('host')
+    print select_service
+    maxservice=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck'))
+    service_1 = []
+    for k in range(0,len(maxservice)):
+        temp = Service.objects.filter(HostName=maxservice[k].get('HostName'),ServiceName=    maxservice[k].get('ServiceName'),LastCheck=maxservice[k].get('max'))
+        for i in range(0,len(temp)):
+            if temp[i].HostName == select_host and temp[i].ServiceName == select_service:
+               temp[i].LastCheck = timestamp_datetime(float(temp[i].LastCheck))
+               service_1.append(temp[i])
+    print service_1
+    
+    return render_to_response('TsinghuaCloudMonitor/monitor.html',{'service':service_1})  
+    
     
 def hoststatus(request):
-    host=HostStatus.objects.all()
+    host=[]
+    maxhost=HostStatus.objects.all().values('HostName').annotate(max=Max('LastCheck'))
+    for i in range(0,len(maxhost)):
+        temp = HostStatus.objects.filter(HostName=maxhost[i].get('HostName'),LastCheck=maxhost[i].get('max'))  
+        for i in range(0,len(temp)):
+            temp[i].LastCheck = timestamp_datetime(float(temp[i].LastCheck))
+            host.append(temp[i])
+       
     return render(request,'TsinghuaCloudMonitor/hoststatus.html',{'host':host,})
 
 def hostdetail(request,serviceid):
@@ -49,14 +76,15 @@ def hostdetail(request,serviceid):
     memory_used = []
     memory_timestamp = []
     for k in range(len(memory)-1,0,-1):
-        memory_total.append(p.findall(memory[k].PerformanceData)[0])
-        if k==(len(memory)-1):
-           memory_used.append(p.findall(memory[k].PerformanceData)[1])
-           memory_timestamp.append(timestamp_datetime(float(memory[k].LastCheck)))
-        else: 
-           if p.findall(memory[k].PerformanceData)[1]!=p.findall(memory[k+1].PerformanceData)[1]:
+        if p.findall(memory[k].PerformanceData):
+           memory_total.append(p.findall(memory[k].PerformanceData)[0])
+           if k==(len(memory)-1):
               memory_used.append(p.findall(memory[k].PerformanceData)[1])
               memory_timestamp.append(timestamp_datetime(float(memory[k].LastCheck)))
+           else: 
+              if p.findall(memory[k].PerformanceData)[1]!=p.findall(memory[k+1].PerformanceData)[1]:
+                 memory_used.append(p.findall(memory[k].PerformanceData)[1])
+                 memory_timestamp.append(timestamp_datetime(float(memory[k].LastCheck)))
         
     print memory_used
     print memory_timestamp

@@ -13,6 +13,7 @@ urlpatterns = patterns('',
     url(r'^', include('TsinghuaCloudMonitor.urls')),
     url(r'^login/$', views.login, name='login'),
     url(r'^monitor/$', views.monitor, name='monitor'),
+    
    
 
 )

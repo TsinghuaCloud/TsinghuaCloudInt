@@ -1,0 +1,227 @@
+{% csrf_token %}
+{% load staticfiles %}
+
+<script>
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+// DONE DJANGO HACK
+
+function get_site_prefix(){
+    var href = $(location).attr("href");
+    return href
+}
+
+function cache_clear()
+    {
+    window.location.reload(true);
+    alert('refresh');
+}
+
+
+        
+$(function () {
+var csrftoken = getCookie('csrftoken'); 
+    $(document).ready(function(){
+     setInterval(function(){cache_clear()},1000000);
+     });
+      
+    $.ajaxSetup({
+        crossDomain: false, // obviates need for sameOrigin test
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type)) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+    // END DJANGO AJAX
+  
+          
+});
+
+
+
+</script>
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Basic Panel - jQuery EasyUI Demo</title>
+<script src="{% static 'jquery-easyui-1/jquery.min.js'%}"></script>
+<script src="{% static 'jquery-easyui-1/jquery.easyui.min.js'%}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'cloudclient/monitor.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/icon.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/default/easyui.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/demo/demo.css' %}">
+</head>
+
+<body class="easyui-layout">
+	<div data-options="region:'north',border:false" style="height:60px;font-size:28px;background:#F5F5F5;padding:10px">Tsinghua Cloud Monitor</div>
+	<div data-options="region:'west',split:true,title:'Menu'" style="width:150px;padding:10px;">
+	<a href="/homepage" class="easyui-linkbutton" style="width:130px">Homepage</a>
+	<a href="/monitor" class="easyui-linkbutton" style="width:130px">Services</a>
+	<a href="/hoststatus" class="easyui-linkbutton" style="width:130px">Hosts</a>
+	<a href="/mapchart" class="easyui-linkbutton" style="width:130px">Map</a>
+</div></div>
+	<div data-options="region:'east',split:true,collapsed:true,title:'East'" style="width:100px;padding:10px;">east region</div>
+	<div data-options="region:'south',border:false" style="height:20px;background:#F5F5F5;padding:10px;"></div>
+	<div data-options="region:'center',title:'Map Chart'">
+	<div id="map" style="height:700px;width:1300px;"></div>
+<!-- ECharts单文件引入 -->
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+<script type="text/javascript">
+        // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            }
+        });
+// 使用
+        require(
+            [
+                'echarts',
+                'echarts/chart/force' // 使用柱状图就加载bar模块，按需加载
+               
+            ],
+            function (ec) {
+                // 基于准备好的dom，初始化echarts图表
+                var myChart = ec.init(document.getElementById('map')); 
+                var option = {
+    title : {
+        text: 'Host Map',
+       
+        x:'right',
+        y:'bottom'
+    },
+    tooltip : {
+        trigger: 'item',
+        formatter: '{a} : {b}'
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            restore : {show: true},
+            magicType: {show: true, type: ['force', 'chord']},
+            saveAsImage : {show: true}
+        }
+    },
+    legend: {
+        x: 'left',
+        data:['Host']
+    },
+    series : [
+        {
+            type:'force',
+            name : "Host Map",
+            ribbonType: false,
+            categories : [
+                {
+                    name: 'Host'
+                },
+                            ],
+            itemStyle: {
+                normal: {
+                    label: {
+                        show: true,
+                        textStyle: {
+                            color: '#333'
+                        }
+                    },
+                    nodeStyle : {
+                        brushType : 'both',
+                        borderColor : 'rgba(255,215,0,0.4)',
+                        borderWidth : 1
+                    },
+                    linkStyle: {
+                        type: 'curve'
+                    }
+                },
+                emphasis: {
+                    label: {
+                        show: false
+                        // textStyle: null      // 默认使用全局文本样式，详见TEXTSTYLE
+                    },
+                    nodeStyle : {
+                        //r: 30
+                    },
+                    linkStyle : {}
+                }
+            },
+            useWorker: false,
+            minRadius : 30,
+            maxRadius : 55,
+            gravity: 1.1,
+            scaling: 1.1,
+            roam: 'move',
+            nodes:[
+                {category:0, name: 'Center', value : 15, label: 'Switch Center'},
+                {category:1, name: '220',value : 5},
+                {category:1, name: '221',value : 7},
+                {category:1, name: '222',value : 8},
+                {category:1, name: 'Localhost',value : 9},
+               
+            ],
+            links : [
+             
+                {source : '220', target : 'Center', weight : 2},
+                {source : '221', target : 'Center', weight : 6},
+                {source : '222', target : 'Center', weight : 5},
+                {source : '222', target : 'Localhost', weight : 5},
+                {source : 'Localhost', target : 'Center', weight : 7},
+                           ]
+        }
+    ]
+};
+var ecConfig = require('echarts/config');
+function focus(param) {
+    var data = param.data;
+    var links = option.series[0].links;
+    var nodes = option.series[0].nodes;
+    if (
+        data.source !== undefined
+        && data.target !== undefined
+    ) { //点击的是边
+        var sourceNode = nodes[data.source];
+        var targetNode = nodes[data.target];
+        console.log("选中了边 " + sourceNode.name + ' -> ' + targetNode.name + ' (' + data.weight + ')');
+    } else { // 点击的是点
+        console.log("选中了" + data.name + '(' + data.value + ')');
+    }
+}
+myChart.on(ecConfig.EVENT.CLICK, focus)
+
+myChart.on(ecConfig.EVENT.FORCE_LAYOUT_END, function () {
+    console.log(myChart.chart.force.getPosition());
+});
+
+
+                                        
+                // 为echarts对象加载数据 
+                myChart.setOption(option); 
+            }
+        );
+
+</script>
+  
+	</div>
+</body>
+</html>

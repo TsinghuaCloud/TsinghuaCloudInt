@@ -7,7 +7,8 @@ urlpatterns = patterns('',
     url(r'^hoststatus/$', views.hoststatus, name='hoststatus'),
     url(r'^hostdetail/([0-9]+)/$', views.hostdetail, name='hostdetail'),
     url(r'^hostdetailmore/([0-9]+)/$', views.hostdetailmore, name='hostdetailmore'),
-
-
+    url(r'^mapchart/$', views.mapchart, name='map'),
+    url(r'^monitor/doSearch/$', views.doSearch, name='doSearch'),
+    
 
 )
