@@ -93,7 +93,7 @@ function doSearch(){
                 }
             }
              $('.datagrid-td-merged').find('a').css('font-size','15px');
-             $('.datagrid-td-merged').css('background-color','#FFFFF0'); 
+             $('.datagrid-td-merged').css('background-color','#7B7B7B'); 
              
              
          }
@@ -131,12 +131,12 @@ var csrftoken = getCookie('csrftoken');
 <script src="{% static 'jquery-easyui-1/jquery.easyui.min.js'%}"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'cloudclient/monitor.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/icon.css' %}">
-<link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/default/easyui.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/black/easyui.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/demo/demo.css' %}">
 </head>
 
 <body class="easyui-layout">
-	<div data-options="region:'north',border:false" style="height:60px;font-size:28px;background:#F5F5F5;padding:10px">Tsinghua Cloud Monitor</div>
+	<div data-options="region:'north',border:false" style="height:60px;font-size:28px;background:#F5F5F5;color:#3C3C3C;padding:10px">Tsinghua Cloud Monitor</div>
 	<div data-options="region:'west',split:true,title:'Menu'" style="width:150px;padding:10px;">
 	<a href="/login" class="easyui-linkbutton" style="width:130px">Log out</a>
 	<a href="/monitor" class="easyui-linkbutton" style="width:130px">Services</a>
@@ -152,7 +152,7 @@ var csrftoken = getCookie('csrftoken');
 				<thead>
 					<tr>
 						<th data-options="field:'itemid'" width="50" sortable="true">Host</th>
-						<th data-options="field:'listprice'" width="30">Status</th>
+						<th data-options="field:'listprice'" width="50">Status</th>
 						<th data-options="field:'unitcost'" width="80">Last Check</th>
 						<th data-options="field:'attr1'" width="180">Status Information</th>
 						<th data-options="field:'status'" width="200">Duration</th>
@@ -161,11 +161,11 @@ var csrftoken = getCookie('csrftoken');
 				<tbody>
                        {% for host in host %}
                        <tr>
-                       <td class='detail'><a href="{% url 'hostdetailmore' host.id%}">{{host.HostName}}</a></td>
+                       <td class='detail'><a href="{% url 'hostdetailmore' host.id%}" style="color:white">{{host.HostName}}</a></td>
                        <td>UP</td>
                        <td>{{host.LastCheck}}</td>
                        <td>{{host.PluginOutput}}</td>
-                       <td>4d 0h 45m 33s</td>
+                       <td>{{host.Duration}}</td>
                        </tr>
                        {% endfor %}
 

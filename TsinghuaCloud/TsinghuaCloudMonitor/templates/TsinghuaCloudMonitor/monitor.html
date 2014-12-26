@@ -100,7 +100,7 @@ function doSearch(){
                 }
             }
              $('.datagrid-td-merged').find('a').css('font-size','15px');
-             $('.datagrid-td-merged').css('background-color','#FFFFF0'); 
+             $('.datagrid-td-merged').css('background-color','#FFFFCC'); 
              
              
          }
@@ -138,14 +138,14 @@ var csrftoken = getCookie('csrftoken');
 <script src="{% static 'jquery-easyui-1/jquery.easyui.min.js'%}"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'cloudclient/monitor.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/icon.css' %}">
-<link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/default/easyui.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/black/easyui.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/demo/demo.css' %}">
 </head>
 
 <body class="easyui-layout">
-	<div data-options="region:'north',border:false" style="height:60px;font-size:28px;background:#F5F5F5;padding:10px">Tsinghua Cloud Monitor</div>
+	<div data-options="region:'north',border:false" style="height:60px;font-size:28px;color:	#3C3C3C;background:#F5F5F5;padding:10px">Tsinghua Cloud Monitor</div>
 	<div data-options="region:'west',split:true,title:'Menu'" style="width:150px;padding:10px;">
-	<a href="/login" class="easyui-linkbutton" style="width:130px">Homepage</a>
+	<a href="/login" class="easyui-linkbutton" style="width:130px">Log out</a>
 	<a href="/monitor" class="easyui-linkbutton" style="width:130px">Services</a>
 	<a href="/hoststatus" class="easyui-linkbutton" style="width:130px">Hosts</a>
 	<a href="/mapchart" class="easyui-linkbutton" style="width:130px">Map</a>
@@ -162,9 +162,9 @@ var csrftoken = getCookie('csrftoken');
 						<th data-options="field:'productid'" width="70">Service</th>
 						<th data-options="field:'listprice'" width="30">Status</th>
 						<th data-options="field:'unitcost'" width="80">Last Check</th>
-						<th data-options="field:'duration'" width="80">Duration</th>
+						<th data-options="field:'duration'" width="70">Duration</th>
 						<th data-options="field:'attr1'" width="180">Status Information</th>
-						<th data-options="field:'status'" width="200">Performance Data</th>
+						<th data-options="field:'status'" width="220">Performance Data</th>
 					</tr>
 				</thead>
 				<tbody>
