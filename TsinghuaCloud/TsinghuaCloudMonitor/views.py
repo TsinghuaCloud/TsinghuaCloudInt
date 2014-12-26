@@ -33,7 +33,7 @@ def monitor(request):
     for k in range(0,len(maxservice)):
         temp = Service.objects.filter(HostName=maxservice[k].get('HostName'),ServiceName=    maxservice[k].get('ServiceName'),LastCheck=maxservice[k].get('max'))
         for i in range(0,len(temp)):
-            temp[i].LastCheck = timestamp_datetime(float(temp[i].LastCheck))
+            
             service.append(temp[i])
     print service
     return render(request,'TsinghuaCloudMonitor/monitor.html',{'service':service})     
@@ -48,7 +48,7 @@ def doSearch(request):
         temp = Service.objects.filter(HostName=maxservice[k].get('HostName'),ServiceName=    maxservice[k].get('ServiceName'),LastCheck=maxservice[k].get('max'))
         for i in range(0,len(temp)):
             if temp[i].HostName == select_host and temp[i].ServiceName == select_service:
-               temp[i].LastCheck = timestamp_datetime(float(temp[i].LastCheck))
+               
                service_1.append(temp[i])
     print service_1
     
@@ -61,14 +61,13 @@ def hoststatus(request):
     for i in range(0,len(maxhost)):
         temp = HostStatus.objects.filter(HostName=maxhost[i].get('HostName'),LastCheck=maxhost[i].get('max'))  
         for i in range(0,len(temp)):
-            temp[i].LastCheck = timestamp_datetime(float(temp[i].LastCheck))
+            
             host.append(temp[i])
        
     return render(request,'TsinghuaCloudMonitor/hoststatus.html',{'host':host,})
 
 def hostdetail(request,serviceid):
     service = get_object_or_404(Service, pk=serviceid)
-    print service.HostName
     host = get_object_or_404(Host, HostName=service.HostName)
     memory = Service.objects.filter(HostName=service.HostName, ServiceName='MemoryUsage')
     p = re.compile(r'\d+')
@@ -80,14 +79,13 @@ def hostdetail(request,serviceid):
            memory_total.append(p.findall(memory[k].PerformanceData)[0])
            if k==(len(memory)-1):
               memory_used.append(p.findall(memory[k].PerformanceData)[1])
-              memory_timestamp.append(timestamp_datetime(float(memory[k].LastCheck)))
+              memory_timestamp.append(memory[k].LastCheck)
            else: 
               if p.findall(memory[k].PerformanceData)[1]!=p.findall(memory[k+1].PerformanceData)[1]:
                  memory_used.append(p.findall(memory[k].PerformanceData)[1])
-                 memory_timestamp.append(timestamp_datetime(float(memory[k].LastCheck)))
-        
-    print memory_used
+                 memory_timestamp.append(memory[k].LastCheck)
     print memory_timestamp
+    print memory_used
     cpuload = Service.objects.filter(HostName=service.HostName, ServiceName='cpuload')
     p = re.compile(r'(\d+)\.(\d*)')
     cpu_one= []
@@ -97,37 +95,36 @@ def hostdetail(request,serviceid):
         if k==(len(cpuload)-1):
            cpu_one.append('.'.join(p.findall(cpuload[k].PerformanceData)[0]))
            cpu_five.append('.'.join(p.findall(cpuload[k].PerformanceData)[3]))
-           cpu_timestamp.append(timestamp_datetime(float(cpuload[k].LastCheck)))
+           cpu_timestamp.append(cpuload[k].LastCheck)
         else: 
            if '.'.join(p.findall(cpuload[k].PerformanceData)[0])!='.'.join(p.findall(cpuload[k+1].PerformanceData)[0]):
               cpu_one.append('.'.join(p.findall(cpuload[k].PerformanceData)[0]))
               cpu_five.append('.'.join(p.findall(cpuload[k].PerformanceData)[3]))
-              cpu_timestamp.append(timestamp_datetime(float(cpuload[k].LastCheck)))
-        
-    print cpu_one
-    print cpu_five
-    
+              cpu_timestamp.append(cpuload[k].LastCheck)
+
     disk = Service.objects.filter(HostName=service.HostName, ServiceName='disk')
     p = re.compile(r'\d+')
     diskuse= []
+    disk_timestamp = []
     for k in range(len(disk)-1,0,-1):
         if k==(len(disk)-1):
            diskuse.append(p.findall(disk[k].PerformanceData)[0])
+           disk_timestamp.append(disk[k].LastCheck)
         else: 
            if p.findall(disk[k].PerformanceData)[0]!=p.findall(disk[k+1].PerformanceData)[0]:
               diskuse.append(p.findall(disk[k].PerformanceData)[0])
-        
-    print diskuse
-    
+              disk_timestamp.append(disk[k].LastCheck)
+
     process = Service.objects.filter(HostName=service.HostName, ServiceName='total-procs')
     p = re.compile(r'\d+')
     pro = []
+    pro_timestamp = []
     for k in range(len(process)-1,0,-1):
           pro.append(p.findall(process[k].PerformanceData)[0])
-        
-    print pro
+          pro_timestamp.append(process[k].LastCheck)
+
     if host:
-        return render_to_response('TsinghuaCloudMonitor/hostdetail.html', {'host': host,'memory_total':memory_total,'memory_used':memory_used,'memory_timestamp':memory_timestamp,'cpu_one':cpu_one,'cpu_five':cpu_five,'cpu_timestamp':cpu_timestamp,'diskuse':diskuse,'pro':pro })
+        return render_to_response('TsinghuaCloudMonitor/hostdetail.html', {'host': host,'memory_total':memory_total,'memory_used':memory_used,'memory_timestamp':memory_timestamp,'cpu_one':cpu_one,'cpu_five':cpu_five,'cpu_timestamp':cpu_timestamp,'diskuse':diskuse,'disk_timestamp':disk_timestamp,'pro':pro,'pro_timestamp':pro_timestamp })
     else:
         return HttpResponse("ERROR")
  
@@ -135,8 +132,72 @@ def hostdetail(request,serviceid):
 def hostdetailmore(request,hostid):
     hoststatus = get_object_or_404(HostStatus, pk=hostid)
     host = get_object_or_404(Host, HostName=hoststatus.HostName)
-    print host.HostName
-    return render_to_response('TsinghuaCloudMonitor/hostdetailmore.html', {'host': host})
+    memory = Service.objects.filter(HostName=host.HostName, ServiceName='MemoryUsage')
+    p = re.compile(r'\d+')
+    memory_total= []
+    memory_used = []
+    memory_timestamp = []
+    for k in range(len(memory)-1,0,-1):
+        if p.findall(memory[k].PerformanceData):
+           memory_total.append(p.findall(memory[k].PerformanceData)[0])
+           if k==(len(memory)-1):
+              memory_used.append(p.findall(memory[k].PerformanceData)[1])
+              memory_timestamp.append(memory[k].LastCheck)
+           else: 
+              if p.findall(memory[k].PerformanceData)[1]!=p.findall(memory[k+1].PerformanceData)[1]:
+                 memory_used.append(p.findall(memory[k].PerformanceData)[1])
+                 memory_timestamp.append(memory[k].LastCheck)
+    test = []
+    
+    print memory_used
+    print memory_timestamp
+    cpuload = Service.objects.filter(HostName=host.HostName, ServiceName='cpuload')
+    p = re.compile(r'(\d+)\.(\d*)')
+    cpu_one= []
+    cpu_five = []
+    cpu_timestamp = []
+    for k in range(len(cpuload)-1,0,-1):
+        if k==(len(cpuload)-1):
+           cpu_one.append('.'.join(p.findall(cpuload[k].PerformanceData)[0]))
+           cpu_five.append('.'.join(p.findall(cpuload[k].PerformanceData)[3]))
+           cpu_timestamp.append(cpuload[k].LastCheck)
+        else: 
+           if '.'.join(p.findall(cpuload[k].PerformanceData)[0])!='.'.join(p.findall(cpuload[k+1].PerformanceData)[0]):
+              cpu_one.append('.'.join(p.findall(cpuload[k].PerformanceData)[0]))
+              cpu_five.append('.'.join(p.findall(cpuload[k].PerformanceData)[3]))
+              cpu_timestamp.append(cpuload[k].LastCheck)
+        
+    print cpu_one
+    print cpu_five
+    
+    disk = Service.objects.filter(HostName=host.HostName, ServiceName='disk')
+    p = re.compile(r'\d+')
+    diskuse= []
+    disk_timestamp = []
+    for k in range(len(disk)-1,0,-1):
+        if k==(len(disk)-1):
+           diskuse.append(p.findall(disk[k].PerformanceData)[0])
+           disk_timestamp.append(disk[k].LastCheck)
+        else: 
+           if p.findall(disk[k].PerformanceData)[0]!=p.findall(disk[k+1].PerformanceData)[0]:
+              diskuse.append(p.findall(disk[k].PerformanceData)[0])
+              disk_timestamp.append(disk[k].LastCheck)
+        
+    print diskuse
+    
+    process = Service.objects.filter(HostName=host.HostName, ServiceName='total-procs')
+    p = re.compile(r'\d+')
+    pro = []
+    pro_timestamp = []
+    for k in range(len(process)-1,0,-1):
+          pro.append(p.findall(process[k].PerformanceData)[0])
+          pro_timestamp.append(process[k].LastCheck)
+
+    print pro
+    if host:
+        return render_to_response('TsinghuaCloudMonitor/hostdetail.html', {'host': host,'memory_total':memory_total,'memory_used':memory_used,'memory_timestamp':memory_timestamp,'cpu_one':cpu_one,'cpu_five':cpu_five,'cpu_timestamp':cpu_timestamp,'diskuse':diskuse,'disk_timestamp':disk_timestamp,'pro':pro,'pro_timestamp':pro_timestamp})
+    else:
+        return HttpResponse("ERROR")
      
     
 def login(request): 

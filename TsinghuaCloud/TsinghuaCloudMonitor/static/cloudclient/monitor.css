@@ -2,7 +2,7 @@ body{
   background: #FCFCFC;
 }
 
-a:link{color:#170f18;text-decoration: none; }
+a:link{color:#170f18;}
 a:visited{color:#170f18; }
 a:active{color:#319ac6}
 a:hover{color:#319ac6}

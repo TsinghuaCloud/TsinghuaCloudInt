@@ -8,8 +8,10 @@ class User(models.Model):
     
 class Service(models.Model):
     ServiceName = models.CharField(max_length=50)
-    MachineID = models.CharField(max_length=50)
     HostName = models.CharField(max_length=50)
+    Status = models.CharField(max_length=50)
+    Attempt = models.CharField(max_length=50)
+    Duration = models.CharField(max_length=50)
     PluginOutput = models.CharField(max_length=50)
     PerformanceData = models.CharField(max_length=100)
     LastCheck = models.CharField(max_length=50)
@@ -17,6 +19,7 @@ class Service(models.Model):
 class HostStatus(models.Model):
     HostName = models.CharField(max_length=50)
     PluginOutput = models.CharField(max_length=50)
+    Duration = models.CharField(max_length=50)
     PerformanceData = models.CharField(max_length=100)
     LastCheck = models.CharField(max_length=50)
 

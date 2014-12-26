@@ -61,6 +61,13 @@ function doSearch(){
             var PerValue = "";
             var CurValue = "";
             var length = Arr.length - 1;
+            var test = [];
+            for (i=72;i>=30;i--){
+                var k=2*i;
+	            test.push("{"+'{'+'pro.'+k+"}}");
+	         
+            }
+            //alert(test);
             for (i = length; i >= 0; i--) {
                 fldName = Arr[i];
                 PerValue = "";
@@ -138,7 +145,7 @@ var csrftoken = getCookie('csrftoken');
 <body class="easyui-layout">
 	<div data-options="region:'north',border:false" style="height:60px;font-size:28px;background:#F5F5F5;padding:10px">Tsinghua Cloud Monitor</div>
 	<div data-options="region:'west',split:true,title:'Menu'" style="width:150px;padding:10px;">
-	<a href="/homepage" class="easyui-linkbutton" style="width:130px">Homepage</a>
+	<a href="/login" class="easyui-linkbutton" style="width:130px">Homepage</a>
 	<a href="/monitor" class="easyui-linkbutton" style="width:130px">Services</a>
 	<a href="/hoststatus" class="easyui-linkbutton" style="width:130px">Hosts</a>
 	<a href="/mapchart" class="easyui-linkbutton" style="width:130px">Map</a>
@@ -155,6 +162,7 @@ var csrftoken = getCookie('csrftoken');
 						<th data-options="field:'productid'" width="70">Service</th>
 						<th data-options="field:'listprice'" width="30">Status</th>
 						<th data-options="field:'unitcost'" width="80">Last Check</th>
+						<th data-options="field:'duration'" width="80">Duration</th>
 						<th data-options="field:'attr1'" width="180">Status Information</th>
 						<th data-options="field:'status'" width="200">Performance Data</th>
 					</tr>
@@ -166,6 +174,7 @@ var csrftoken = getCookie('csrftoken');
                         <td>{{service.ServiceName}}</td>
                         <td><span style="color:#3CB371;">OK</span></td>
                         <td>{{service.LastCheck}}</td>
+                        <td>{{service.Duration}}</td>
                         <td>{{service.PluginOutput}}</td>
                         <td>{{service.PerformanceData}}</td>
                         </tr>
