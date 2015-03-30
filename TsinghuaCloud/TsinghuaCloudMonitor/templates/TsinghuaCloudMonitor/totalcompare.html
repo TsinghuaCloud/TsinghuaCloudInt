@@ -1,0 +1,438 @@
+{% csrf_token %}
+{% load staticfiles %}
+
+<script>
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+// DONE DJANGO HACK
+
+function get_site_prefix(){
+    var href = $(location).attr("href");
+    return href
+}
+
+function cache_clear()
+    {
+    window.location.reload(true);
+    alert('refresh');
+}
+
+
+        
+$(function () {
+var csrftoken = getCookie('csrftoken'); 
+    $(document).ready(function(){
+     setInterval(function(){cache_clear()},1000000);
+     });
+      
+    $.ajaxSetup({
+        crossDomain: false, // obviates need for sameOrigin test
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type)) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+    // END DJANGO AJAX
+  
+          
+});
+
+
+
+</script>
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Basic Panel - jQuery EasyUI Demo</title>
+<script src="{% static 'jquery-easyui-1/jquery.min.js'%}"></script>
+<script src="{% static 'jquery-easyui-1/jquery.easyui.min.js'%}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'cloudclient/monitor.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/icon.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/black/easyui.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/demo/demo.css' %}">
+</head>
+
+<body class="easyui-layout">
+	<div data-options="region:'north',border:false" style="height:60px;font-size:28px;background:#F5F5F5;color:#3C3C3C;padding:10px">清华云平台－监控模块</div>
+	<div data-options="region:'west',split:true,title:'菜单'" style="width:150px;padding:10px;">
+	<a href="/login" class="easyui-linkbutton" style="width:130px">登出</a>
+	<a href="/monitor" class="easyui-linkbutton" style="width:130px">网络服务</a>
+	<a href="/hoststatus" class="easyui-linkbutton" style="width:130px">主机信息</a>
+	<a href="/mapchart" class="easyui-linkbutton" style="width:130px">网络拓扑</a>
+    <a href="/totalcompare" class="easyui-linkbutton" style="width:130px">全局监控</a>
+</div></div>
+	
+	
+	<div data-options="region:'south',border:false" style="height:20px;background:#F5F5F5;padding:10px;"></div>
+	<div data-options="region:'center',title:'全局监控图'" style="background:#F0F0F0">
+	<div id="memoryusage" style="height:700px;width:1300px;"></div>
+<!-- ECharts单文件引入 -->
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+<script type="text/javascript">
+        // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            }
+        });
+// 使用
+        require(
+            [
+                'echarts',
+                'echarts/chart/pie' // 使用柱状图就加载bar模块，按需加载
+               
+            ],
+            function (ec) {
+                // 基于准备好的dom，初始化echarts图表
+                var myChart = ec.init(document.getElementById('memoryusage')); 
+                var option = {
+    title : {
+        text: '全局内存使用情况',
+        subtext: '各主机已使用内存',
+        x:'center'
+    },
+    tooltip : {
+        trigger: 'item',
+        formatter: "{a} <br/>{b} : {c} ({d}%)"
+    },
+    legend: {
+        orient : 'vertical',
+        x : 'left',
+        data:['{{memoryuse_name.0}}','{{memoryuse_name.1}}','{{memoryuse_name.2}}','{{memoryuse_name.3}}','{{memoryuse_name.4}}']
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {
+                show: true, 
+                type: ['pie', 'funnel'],
+                option: {
+                    funnel: {
+                        x: '25%',
+                        width: '50%',
+                        funnelAlign: 'left',
+
+                    }
+                }
+            },
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    series : [
+        {
+            name:'访问来源',
+            type:'pie',
+            radius : '55%',
+            center: ['50%', '60%'],
+            data:[
+                {value:{{memoryuse_used.0}}, name:'{{memoryuse_name.0}}'},
+                {value:{{memoryuse_used.1}}, name:'{{memoryuse_name.1}}'},
+                {value:{{memoryuse_used.2}}, name:'{{memoryuse_name.2}}'},
+                {value:{{memoryuse_used.3}}, name:'{{memoryuse_name.3}}'},
+                {value:{{memoryuse_used.4}}, name:'{{memoryuse_name.4}}'}
+            ]
+        }
+    ]
+};
+                    
+                // 为echarts对象加载数据 
+                myChart.setOption(option); 
+            }
+        );
+
+</script>
+	<div id="cpuusage" style="height:700px;width:1300px;"></div>
+<!-- ECharts单文件引入 -->
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+<script type="text/javascript">
+        // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            }
+        });
+// 使用
+        require(
+            [
+                'echarts',
+                'echarts/chart/pie' // 使用柱状图就加载bar模块，按需加载
+               
+            ],
+            function (ec) {
+                // 基于准备好的dom，初始化echarts图表
+                var myChart = ec.init(document.getElementById('cpuusage')); 
+                var option = {
+    title : {
+        text: 'cpu使用情况',
+        subtext: '5min内使用情况统计',
+        x:'center'
+    },
+    tooltip : {
+        trigger: 'item',
+        formatter: "{a} <br/>{b} : {c} ({d}%)"
+    },
+    legend: {
+        orient : 'vertical',
+        x : 'left',
+        data:['{{cpuloaduse_name.0}}','{{cpuloaduse_name.1}}','{{cpuloaduse_name.2}}','{{cpuloaduse_name.3}}','{{cpuloaduse_name.4}}']
+    },
+    color : [ 
+    '#6495ed','#87cefa', '#da70d6', '#32cd32', '#6495ed', 
+    '#ff69b4', '#ba55d3', '#cd5c5c', '#ffa500', '#40e0d0', 
+    '#1e90ff', '#ff6347', '#7b68ee', '#00fa9a', '#ffd700', 
+    '#6b8e23', '#ff00ff', '#3cb371', '#b8860b', '#30e0e0' 
+     ],
+
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {
+                show: true, 
+                type: ['pie', 'funnel'],
+                option: {
+                    funnel: {
+                        x: '25%',
+                        width: '50%',
+                        funnelAlign: 'left',
+
+                    }
+                }
+            },
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    series : [
+        {
+            name:'访问来源',
+            type:'pie',
+            radius : '55%',
+            center: ['50%', '60%'],
+            data:[
+                {value:{{cpuloaduse_used.0}}, name:'{{cpuloaduse_name.0}}'},
+                {value:{{cpuloaduse_used.1}}, name:'{{cpuloaduse_name.1}}'},
+                {value:{{cpuloaduse_used.2}}, name:'{{cpuloaduse_name.2}}'},
+                {value:{{cpuloaduse_used.3}}, name:'{{cpuloaduse_name.3}}'},
+                {value:{{cpuloaduse_used.4}}, name:'{{cpuloaduse_name.4}}'}
+            ]
+        }
+    ]
+};
+                    
+                // 为echarts对象加载数据 
+                myChart.setOption(option); 
+            }
+        );
+
+</script>
+
+	<div id="diskusage" style="height:700px;width:1300px;"></div>
+<!-- ECharts单文件引入 -->
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+<script type="text/javascript">
+        // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            }
+        });
+// 使用
+        require(
+            [
+                'echarts',
+                'echarts/chart/pie' // 使用柱状图就加载bar模块，按需加载
+               
+            ],
+            function (ec) {
+                // 基于准备好的dom，初始化echarts图表
+                var myChart = ec.init(document.getElementById('diskusage')); 
+                var option = {
+    tooltip : {
+        trigger: 'item',
+        formatter: "{a} <br/>{b} : {c} ({d}%)"
+    },
+     title : {
+        text: '磁盘使用情况',
+        subtext: '磁盘用量统计',
+        x:'center',
+    },
+    legend: {
+        orient : 'vertical',
+        x : 'left',
+        data:['{{diskusage_name.0}}','{{diskusage_name.1}}','{{diskusage_name.2}}','{{diskusage_name.3}}','{{diskusage_name.4}}']
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {
+                show: true, 
+                type: ['pie', 'funnel'],
+                option: {
+                    funnel: {
+                        x: '25%',
+                        width: '50%',
+                        funnelAlign: 'center',
+                        max: 1548
+                    }
+                }
+            },
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    series : [
+        {
+            name:'磁盘用量',
+            type:'pie',
+            radius : ['50%', '70%'],
+            itemStyle : {
+                normal : {
+                    label : {
+                        show : false
+                    },
+                    labelLine : {
+                        show : false
+                    }
+                },
+                emphasis : {
+                    label : {
+                        show : true,
+                        position : 'center',
+                        textStyle : {
+                            fontSize : '30',
+                            fontWeight : 'bold'
+                        }
+                    }
+                }
+            },
+            data:[
+                {value:{{diskusage_used.0}}, name:'{{diskusage_name.0}}'},
+                {value:{{diskusage_used.1}}, name:'{{diskusage_name.1}}'},
+                {value:{{diskusage_used.2}}, name:'{{diskusage_name.2}}'},
+                {value:{{diskusage_used.3}}, name:'{{diskusage_name.3}}'},
+                {value:{{diskusage_used.4}}, name:'{{diskusage_name.4}}'}
+            ]
+        }
+    ]
+};
+                    
+                // 为echarts对象加载数据 
+                myChart.setOption(option); 
+            }
+        );
+
+</script>
+
+
+	<div id="prousage" style="height:500px;width:800px;position:relative;left:20%"></div>
+<!-- ECharts单文件引入 -->
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+<script type="text/javascript">
+        // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            }
+        });
+// 使用
+        require(
+            [
+                'echarts',
+                'echarts/chart/bar' // 使用柱状图就加载bar模块，按需加载
+               
+            ],
+            function (ec) {
+                // 基于准备好的dom，初始化echarts图表
+                var myChart = ec.init(document.getElementById('prousage')); 
+                var option = {
+    title : {
+        text: '进程数量统计',
+        subtext: '',
+        x:'center',
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    color : [ 
+    '#3cb371', '#87cefa', '#da70d6', '#32cd32', '#6495ed', 
+    '#ff69b4', '#ba55d3', '#cd5c5c', '#ffa500', '#40e0d0', 
+    '#1e90ff', '#ff6347', '#7b68ee', '#00fa9a', '#ffd700', 
+    '#6b8e23', '#ff00ff', '#3cb371', '#b8860b', '#30e0e0' 
+     ],
+    
+    legend: {
+        data:['']
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType: {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'value',
+            boundaryGap : [0, 0.01]
+        }
+    ],
+    yAxis : [
+        {
+            type : 'category',
+            data : ['{{pro_name.0}}','{{pro_name.1}}','{{pro_name.2}}','{{pro_name.3}}','{{pro_name.4}}']
+        }
+    ],
+    series : [
+        {
+            name:'',
+            type:'bar',
+            data:[{{pro_used.0}}, {{pro_used.1}}, {{pro_used.2}}, {{pro_used.3}}, {{pro_used.4}}]
+        },
+            ]
+};
+                    
+                // 为echarts对象加载数据 
+                myChart.setOption(option); 
+            }
+        );
+
+</script>
+	</div>
+</body>
+</html>

@@ -1,0 +1,134 @@
+{% csrf_token %}
+{% load staticfiles %}
+
+<script>
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+// DONE DJANGO HACK
+
+function get_site_prefix(){
+    var href = $(location).attr("href");
+    return href
+}
+
+function cache_clear()
+    {
+    window.location.reload(true);
+    alert('refresh');
+}
+
+
+        
+$(function () {
+var csrftoken = getCookie('csrftoken'); 
+    $(document).ready(function(){
+     setInterval(function(){cache_clear()},1000000);
+     });
+      
+    $.ajaxSetup({
+        crossDomain: false, // obviates need for sameOrigin test
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type)) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+    // END DJANGO AJAX
+  
+          
+});
+
+
+
+</script>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Start Page</title>
+    
+    <script src="{% static 'jquery-easyui-1/jquery.min.js'%}"></script>
+    <script src="{% static 'jquery-easyui-1/jquery.easyui.min.js'%}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'cloudclient/monitor.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/icon.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/default/easyui.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/demo/demo.css' %}">
+    </head>
+
+<body>
+    <h2>Welcome to Tsinghua Cloud</h2>
+    <p>This is the tutorial page to install your environment</p>
+    <div style="margin:20px 0;"></div>
+    <div class="easyui-layout" style="width:1400px;height:500px;position:center">
+        <div id="p" data-options="region:'west'" title="系统选择" style="width:20%;padding:10px">
+
+            <select id="cc" style="width:200px">
+	                     
+            </select>
+            <div id="sp">
+		<div style="color:#99BBE8;background:#fafafa;padding:5px;">请选择您的系统：</div>
+		<div style="padding:10px">
+			<input type="radio" name="lang" value="01"><span>Ubuntu</span><br/>
+			<input type="radio" name="lang" value="02"><span>CentOS</span><br/>
+			<input type="radio" name="lang" value="03"><span>Windows</span><br/>
+		</div>
+		
+	    </div>
+	    <a id="button" class="easyui-linkbutton" data-options="iconCls:'icon-search'" style='position:relative;top:200px;left:120px'>查看教程</a>
+        </div>
+        <div data-options="region:'center'" title="教程">
+        
+		<p id='tutorial'> 请先选择系统</p>
+		
+		<a id="button" href="/start_input" class="easyui-linkbutton" style='position:relative;top:300px;left:1000px;'>点此处继续-></a>
+        </div>
+    </div>
+    
+    <script type="text/javascript">
+		$(function(){
+			$('#cc').combo({
+				required:true,
+				editable:false
+			});
+			$('#sp').appendTo($('#cc').combo('panel'));
+			$('#sp input').click(function(){
+				var v = $(this).val();
+				var s = $(this).next('span').text();
+				$('#cc').combo('setValue', v).combo('setText', s).combo('hidePanel');
+			});
+		    $('#button').click(function(){
+		        //alert('dd');
+		        var choice=$('.textbox-value').val();
+		        if(choice=='01'){
+			      $('p').text('Ubuntu Tutorial');   
+		        }
+		        if(choice=='02'){
+			      $('p').text('CentOS Tutorial');   
+		        }
+		        if(choice=='03'){
+			      $('p').text('Windows Tutorial');   
+		        }
+			    
+		    });
+		});
+	</script>
+</body>
+</html>
