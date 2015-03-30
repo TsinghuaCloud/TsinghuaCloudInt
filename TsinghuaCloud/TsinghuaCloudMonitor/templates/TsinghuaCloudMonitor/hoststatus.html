@@ -136,26 +136,27 @@ var csrftoken = getCookie('csrftoken');
 </head>
 
 <body class="easyui-layout">
-	<div data-options="region:'north',border:false" style="height:60px;font-size:28px;background:#F5F5F5;color:#3C3C3C;padding:10px">Tsinghua Cloud Monitor</div>
-	<div data-options="region:'west',split:true,title:'Menu'" style="width:150px;padding:10px;">
-	<a href="/login" class="easyui-linkbutton" style="width:130px">Log out</a>
-	<a href="/monitor" class="easyui-linkbutton" style="width:130px">Services</a>
-	<a href="/hoststatus" class="easyui-linkbutton" style="width:130px">Hosts</a>
-	<a href="/mapchart" class="easyui-linkbutton" style="width:130px">Map</a>
+	<div data-options="region:'north',border:false" style="height:60px;font-size:28px;background:#F5F5F5;color:#3C3C3C;padding:10px">清华云平台－监控模块</div>
+	<div data-options="region:'west',split:true,title:'菜单'" style="width:150px;padding:10px;">
+	<a href="/login" class="easyui-linkbutton" style="width:130px">登出</a>
+	<a href="/monitor" class="easyui-linkbutton" style="width:130px">网络服务</a>
+	<a href="/hoststatus" class="easyui-linkbutton" style="width:130px">主机信息</a>
+	<a href="/mapchart" class="easyui-linkbutton" style="width:130px">网络拓扑</a>
+	<a href="/totalcompare" class="easyui-linkbutton" style="width:130px">全局监控</a>
 </div></div>
 	<div data-options="region:'east',split:true,collapsed:true,title:'East'" style="width:100px;padding:10px;">east region</div>
 	<div data-options="region:'south',border:false" style="height:20px;background:#F5F5F5;padding:10px;"></div>
-	<div data-options="region:'center',title:'Monitor'">
+	<div data-options="region:'center',title:'各主机情况'">
 	    
 		<table id='service-table' class="easyui-datagrid" toolbar="#tb"
 					data-options="border:false,singleSelect:true,fit:true,fitColumns:true,onLoadSuccess:function(data){ MergeCells('service-table','itemid');}">
 				<thead>
 					<tr>
-						<th data-options="field:'itemid'" width="50" sortable="true">Host</th>
-						<th data-options="field:'listprice'" width="50">Status</th>
-						<th data-options="field:'unitcost'" width="80">Last Check</th>
-						<th data-options="field:'attr1'" width="180">Status Information</th>
-						<th data-options="field:'status'" width="200">Duration</th>
+						<th data-options="field:'itemid'" width="50" sortable="true">主机名</th>
+						<th data-options="field:'listprice'" width="50">状态</th>
+						<th data-options="field:'unitcost'" width="80">上次监控时间</th>
+						<th data-options="field:'attr1'" width="180">状态信息</th>
+						<th data-options="field:'status'" width="200">持续时间</th>
 					</tr>
 				</thead>
 				<tbody>

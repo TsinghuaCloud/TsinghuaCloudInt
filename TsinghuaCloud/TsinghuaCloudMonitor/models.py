@@ -28,6 +28,7 @@ class Host(models.Model):
     HostName = models.CharField(max_length=50)
     Owner = models.CharField(max_length=50)
     Info = models.CharField(max_length=50)
+   
 
     
     
