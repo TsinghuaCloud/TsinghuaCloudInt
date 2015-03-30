@@ -361,7 +361,7 @@ def start_input(request):
         else:  
             hostname = request.POST.get('hostname')  
         print hostname
-        host=Host(IP=ip,HostName=hostname,Owner='nagios',Info='UP',flag=0)   
+        host=Host(IP=ip,HostName=hostname,Owner='nagios',Info='UP')   
         host.save()  
         return  HttpResponseRedirect('/monitor')  
   
