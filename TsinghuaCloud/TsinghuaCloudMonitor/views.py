@@ -149,13 +149,14 @@ def hostdetail(request,serviceid):
               memory_used.append(p.findall(memory[k].PerformanceData)[1])
               memory_timestamp.append(memory[k].LastCheck)
            else: 
-                if memory[k].PerformanceData == '':
-                   memory_used.append(0)
-                   memory_timestamp.append(memory[k].LastCheck)
-                else:    
-                     if p.findall(memory[k].PerformanceData)[1]!=p.findall(memory[k+1].PerformanceData)[1]:
-                        memory_used.append(p.findall(memory[k].PerformanceData)[1])
-                        memory_timestamp.append(memory[k].LastCheck)
+                 if memory[k].PerformanceData == '':
+                    print 'ssss'
+                    memory_used.append(0)
+                    memory_timestamp.append(memory[k].LastCheck)
+                 else: 
+                      if (memory[k+1].PerformanceData!='') and (p.findall(memory[k].PerformanceData)[1]!=p.findall(memory[k+1].PerformanceData)[1]) :
+                         memory_used.append(p.findall(memory[k].PerformanceData)[1])
+                         memory_timestamp.append(memory[k].LastCheck)
     print memory_timestamp
     print memory_used
     cpuload = Service.objects.filter(HostName=service.HostName, ServiceName='cpuload')
@@ -170,13 +171,14 @@ def hostdetail(request,serviceid):
            cpu_timestamp.append(cpuload[k].LastCheck)
         else:
              if cpuload[k].PerformanceData == '':
+                print 'dddd'
                 cpu_one.append(0)
                 cpu_five.append(0)
                 cpu_timestamp.append(cpuload[k].LastCheck)                
         
         
              else: 
-                  if '.'.join(p.findall(cpuload[k].PerformanceData)[0])!='.'.join(p.findall(cpuload[k+1].PerformanceData)[0]):
+                  if (cpuload[k+1].PerformanceData!='') and ('.'.join(p.findall(cpuload[k].PerformanceData)[0])!='.'.join(p.findall(cpuload[k+1].PerformanceData)[0])):
                      cpu_one.append('.'.join(p.findall(cpuload[k].PerformanceData)[0]))
                      cpu_five.append('.'.join(p.findall(cpuload[k].PerformanceData)[3]))
                      cpu_timestamp.append(cpuload[k].LastCheck)
@@ -194,7 +196,7 @@ def hostdetail(request,serviceid):
                 diskuse.append(0)
                 disk_timestamp.append(disk[k].LastCheck)   
              else: 
-                  if p.findall(disk[k].PerformanceData)[0]!=p.findall(disk[k+1].PerformanceData)[0]:
+                  if (disk[k+1].PerformanceData!='') and (p.findall(disk[k].PerformanceData)[0]!=p.findall(disk[k+1].PerformanceData)[0]):
                      diskuse.append(p.findall(disk[k].PerformanceData)[0])
                      disk_timestamp.append(disk[k].LastCheck)
 
@@ -361,7 +363,7 @@ def start_input(request):
         else:  
             hostname = request.POST.get('hostname')  
         print hostname
-        host=Host(IP=ip,HostName=hostname,Owner='nagios',Info='UP')   
+        host=Host(IP=ip,HostName=hostname,Owner='nagios',Info='UP') 
         host.save()  
         return  HttpResponseRedirect('/monitor')  
   
@@ -372,3 +374,4 @@ def alogout(request):
     return HttpResponseRedirect('/index') 
     
   
+
