@@ -9,6 +9,7 @@ from django.template.defaulttags import csrf_token
 from django.db.models import Count, Max
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
+from django.http import StreamingHttpResponse
 import re
 import time
 
@@ -389,5 +390,66 @@ def alogout(request):
     logout(request)  
     return HttpResponseRedirect('/index') 
     
+
+
+def download_first(request):
+    # do something...
+  
+    def file_iterator(file_name, chunk_size=512):
+        with open(file_name) as f:
+            while True:
+                c = f.read(chunk_size)
+                if c:
+                    yield c
+                   
+                else:
+                    break
+
+    the_file_name = "installation.sh"
+    response = StreamingHttpResponse(file_iterator(the_file_name))
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = 'attachment;filename="{0}"'.format(the_file_name)
+
+    return response
+        
+def download_second(request):
+    # do something...
+  
+    def file_iterator(file_name, chunk_size=512):
+        with open(file_name) as f:
+            while True:
+                c = f.read(chunk_size)
+                if c:
+                    yield c
+                   
+                else:
+                    break
+
+    the_file_name = "nagios-plugins-2.0.tar.gz"
+    response = StreamingHttpResponse(file_iterator(the_file_name))
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = 'attachment;filename="{0}"'.format(the_file_name)
+
+    return response
+    
+def download_third(request):
+    # do something...
+  
+    def file_iterator(file_name, chunk_size=512):
+        with open(file_name) as f:
+            while True:
+                c = f.read(chunk_size)
+                if c:
+                    yield c
+                   
+                else:
+                    break
+
+    the_file_name = "nrpe-2.14.tar.gz"
+    response = StreamingHttpResponse(file_iterator(the_file_name))
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = 'attachment;filename="{0}"'.format(the_file_name)
+
+    return response
   
 
