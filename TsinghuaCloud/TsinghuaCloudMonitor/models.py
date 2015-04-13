@@ -12,7 +12,7 @@ class Service(models.Model):
     Status = models.CharField(max_length=50)
     Attempt = models.CharField(max_length=50)
     Duration = models.CharField(max_length=50)
-    PluginOutput = models.CharField(max_length=50)
+    PluginOutput = models.CharField(max_length=100)
     PerformanceData = models.CharField(max_length=100)
     LastCheck = models.CharField(max_length=50)
     
