@@ -35,13 +35,6 @@ def timestamp_datetime(value):
     dt = time.strftime(format, value)
     return dt
 
-def begin(request):
-    p = sub.Popen('/home/django/TsinghuaCloud/TsinghuaCloud/signal.py',stdout=sub.PIPE,shell=True)
-    return render(request,'TsinghuaCloudMonitor/start_system.html')
-
-
-
-
 def monitor(request):
     maxservice=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck'))
     service = []
@@ -60,7 +53,7 @@ def doSearch(request):
     maxservice=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck'))
     service_1 = []
     for k in range(0,len(maxservice)):
-        temp = Service.objects.filter(HostName=maxservice[k].get('HostName'),ServiceName=    maxservice[k].get('ServiceName'),LastCheck=maxservice[k].get('max'))
+        temp = Service.objects.filter(HostName=maxservice[k].get('HostName'),ServiceName= maxservice[k].get('ServiceName'),LastCheck=maxservice[k].get('max'))
         for i in range(0,len(temp)):
             if temp[i].HostName == select_host and temp[i].ServiceName == select_service:
                
@@ -171,7 +164,7 @@ def totalcompare(request):
 
     eth_name = []
     eth_up =[]
-      
+
     return render(request,'TsinghuaCloudMonitor/totalcompare.html',{'memoryuse_name':memoryuse_name,'memoryuse_used':memoryuse_used,'memoryuse_total':memoryuse_total,'memoryuse_object':memoryuse_object,'cpuloaduse_name':cpuloaduse_name,'cpuloaduse_used':cpuloaduse_used,'diskusage_name':diskusage_name,
     'diskusage_used':diskusage_used,'diskusage_total':diskusage_total,'diskusage_object':diskusage_object,'pro_name':pro_name,'pro_used':pro_used,'processusage_object':processusage_object}) 
 
@@ -425,6 +418,7 @@ def start_input(request):
         print hostname
         host=Host(IP=ip,HostName=hostname,Owner='nagios',Info='UP') 
         host.save()  
+        p = sub.Popen('/home/django/TsinghuaCloud/TsinghuaCloud/signal.py',stdout=sub.PIPE,shell=True)
         return  HttpResponseRedirect('/monitor')  
   
     return render_to_response('TsinghuaCloudMonitor/start_input.html') 

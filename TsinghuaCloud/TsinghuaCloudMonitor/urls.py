@@ -12,7 +12,6 @@ urlpatterns = patterns('',
     url(r'^download_first/$', views.download_first, name='views.download_first'),
     url(r'^download_second/$', views.download_second, name='views.download_second'),
     url(r'^download_third/$', views.download_third, name='views.download_third'),
-    url(r'^begin/$', views.begin, name='views.begin'),
     url(r'^start_system/$', views.start_system, name='start_system'),
     url(r'^monitor/doSearch/$', views.doSearch, name='doSearch'),
     
