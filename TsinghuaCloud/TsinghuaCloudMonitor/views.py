@@ -36,13 +36,13 @@ def timestamp_datetime(value):
     return dt
 
 def monitor(request):
-    maxservice=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck'))
+    maxservice=Service.objects.all().values('HostName','ServiceName').order_by('HostName').annotate(max=Max('LastCheck'))
     service = []
     for k in range(0,len(maxservice)):
-        temp = Service.objects.filter(HostName=maxservice[k].get('HostName'),ServiceName=    maxservice[k].get('ServiceName'),LastCheck=maxservice[k].get('max'))
-        for i in range(0,len(temp)):
-            
+        temp = Service.objects.filter(HostName=maxservice[k].get('HostName'),ServiceName= maxservice[k].get('ServiceName'),LastCheck=maxservice[k].get('max'))
+        for i in range(0,len(temp)):          
             service.append(temp[i])
+            
     print service
     return render(request,'TsinghuaCloudMonitor/monitor.html',{'service':service})     
 
@@ -104,21 +104,24 @@ def totalcompare(request):
         memoryuse_dic = {'name': memoryuse_name[k],'used': memoryuse_used[k],'total': memoryuse_total[k],'percentage': temp}
         memoryuse_object.append(memoryuse_dic)
 
-    print memoryuse_name
-    print memoryuse_used
     cpuloaduse_name=[]
     cpuloaduse_used=[]
+    cpuloaduse_object=[]
     cpuloaduse=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck')).filter(ServiceName='cpuload')
     print cpuloaduse
     size = len(cpuloaduse)
-    p = re.compile(r'\d+')
+    p = re.compile(r'(\d+)\.(\d*)')
     for k in range(0,size):
         temp=get_object_or_404(Service,HostName=cpuloaduse[k].get('HostName'),ServiceName='cpuload',LastCheck=cpuloaduse[k].get('max'))
         cpuloaduse_name.append(temp.HostName)  
         if temp.PerformanceData == '':
            cpuloaduse_used.append(0)
         else:
-           cpuloaduse_used.append(p.findall(temp.PerformanceData)[3])  
+           cpuloaduse_used.append('.'.join(p.findall(temp.PerformanceData)[3]))
+
+        tem = format(float(cpuloaduse_used[k]),'.2%')
+        cpuloaduse_dic = {'name': cpuloaduse_name[k],'used': cpuloaduse_used[k],'percentage':tem}
+        cpuloaduse_object.append(cpuloaduse_dic)
 
     diskusage_name=[]
     diskusage_used=[]
@@ -163,10 +166,27 @@ def totalcompare(request):
 
 
     eth_name = []
-    eth_up =[]
+    eth_in =[]
+    eth_out = []
+    eth_object = []
+    eth=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck')).filter(ServiceName='Traffic_eth0')
+    size = len(eth)
+    p = re.compile(r'\d+')
+    for k in range(0,size):
+        temp=get_object_or_404(Service,HostName=eth[k].get('HostName'),ServiceName='Traffic_eth0',LastCheck= eth[k].get('max'))
+        eth_name.append(temp.HostName)  
+        if temp.PerformanceData == '':
+           eth_in.append(0)
+           eth_out.append(0)
+        else:
+           eth_in.append(p.findall(temp.PerformanceData)[0])  
+           eth_out.append(p.findall(temp.PerformanceData)[5]) 
+        eth_dic = {'name': eth_name[k],'in': eth_in[k],'out':eth_out[k]}
+        eth_object.append(eth_dic)     
 
-    return render(request,'TsinghuaCloudMonitor/totalcompare.html',{'memoryuse_name':memoryuse_name,'memoryuse_used':memoryuse_used,'memoryuse_total':memoryuse_total,'memoryuse_object':memoryuse_object,'cpuloaduse_name':cpuloaduse_name,'cpuloaduse_used':cpuloaduse_used,'diskusage_name':diskusage_name,
-    'diskusage_used':diskusage_used,'diskusage_total':diskusage_total,'diskusage_object':diskusage_object,'pro_name':pro_name,'pro_used':pro_used,'processusage_object':processusage_object}) 
+
+    return render(request,'TsinghuaCloudMonitor/totalcompare.html',{'memoryuse_name':memoryuse_name,'memoryuse_used':memoryuse_used,'memoryuse_total':memoryuse_total,'memoryuse_object':memoryuse_object,'cpuloaduse_name':cpuloaduse_name,'cpuloaduse_used':cpuloaduse_used,'cpuloaduse_object':cpuloaduse_object,'diskusage_name':diskusage_name,
+    'diskusage_used':diskusage_used,'diskusage_total':diskusage_total,'diskusage_object':diskusage_object,'pro_name':pro_name,'pro_used':pro_used,'processusage_object':processusage_object,'eth_name':eth_name, 'eth_in':eth_in, 'eth_out':eth_out, 'eth_object':eth_object}) 
 
 
 
@@ -403,6 +423,7 @@ def register(request):
     return render_to_response('TsinghuaCloudMonitor/register.html', {'errors': errors}) 
     
 def start_input(request): 
+    errors= [] 
     ip=None  
     hostname=None  
     if request.method == 'POST':  
@@ -419,9 +440,9 @@ def start_input(request):
         host=Host(IP=ip,HostName=hostname,Owner='nagios',Info='UP') 
         host.save()  
         p = sub.Popen('/home/django/TsinghuaCloud/TsinghuaCloud/signal.py',stdout=sub.PIPE,shell=True)
-        return  HttpResponseRedirect('/monitor')  
+        return  HttpResponseRedirect('/hoststatus')  
   
-    return render_to_response('TsinghuaCloudMonitor/start_input.html') 
+    return render_to_response('TsinghuaCloudMonitor/start_input.html',{'errors': errors}) 
   
 def alogout(request):  
     logout(request)  

@@ -79,12 +79,12 @@ table.gridtable {
     font-family: verdana,arial,sans-serif;
     font-size:11px;
     color:#333333;
-    border-width: 1px;
+    border-width: 10px, 10px, 0, 10px;
     border-color: #666666;
-    border-collapse: collapse;
+    
 }
 table.gridtable th {
-    border-width: 1px;
+    border-width: 2px;
     color:#FFFFFF;
     padding: 8px;
     border-style: solid;
@@ -92,7 +92,7 @@ table.gridtable th {
     background-color: #505247;
 }
 table.gridtable td {
-    border-width: 1px;
+    border-width: 2px;
     padding: 8px;
     border-style: solid;
     border-color: #666666;
@@ -101,19 +101,21 @@ table.gridtable td {
 </style>
 
 <body class="easyui-layout">
-	<div data-options="region:'north',border:false" style="height:60px;font-size:28px;background:#F5F5F5;color:#3C3C3C;padding:10px">清华云平台－监控模块</div>
-	<div data-options="region:'west',split:true,title:'菜单'" style="width:150px;padding:10px;">
-    	<a href="/login" class="easyui-linkbutton" style="width:130px">登出</a>
-    	<a href="/monitor" class="easyui-linkbutton" style="width:130px">网络服务</a>
-    	<a href="/hoststatus" class="easyui-linkbutton" style="width:130px">主机信息</a>
-    	<a href="/mapchart" class="easyui-linkbutton" style="width:130px">网络拓扑</a>
+	 <div data-options="region:'north',border:false" style="height:60px;font-size:28px;color:#3C3C3C;background:#F5F5F5;padding:10px">清华云平台－监控模块
+        <a href="/login" class="easyui-linkbutton" style="background:#CCCCCC;width:60px;height:30px;position:relative;float:right;">登出</a>
+   </div>
+   <div data-options="region:'west',split:true,title:'菜单'" style="width:150px;padding:10px;">
+        <a href="/hoststatus" class="easyui-linkbutton" style="width:130px">首页</a>
+        <a href="/monitor" class="easyui-linkbutton" style="width:130px">详细信息</a>
+        <a href="/start_system" class="easyui-linkbutton" style="width:130px">网络服务</a>
+        <a href="/mapchart" class="easyui-linkbutton" style="width:130px">网络拓扑</a>
         <a href="/totalcompare" class="easyui-linkbutton" style="width:130px">全局监控</a>
     </div>
 	<div data-options="region:'center',title:'全局监控图'" style="background:#F0F0F0;position:relative;">
         
-        <div style="position:relative;height:600px;">
-        	<div id="memoryusage" style="height:600px;width:1000px;position:absolute;top:0;left:0"></div>
-            <div id='memoryusage_form' style='height:300px;width:280px;float:right;'>
+        <div style="position:relative;height:600px;width:1300px">
+        	<div id="memoryusage" style="height:600px;width:1000px;position:absolute;top:0;left:0; border:2px solid;border-color:#666666; "></div>
+            <div id='memoryusage_form' style='height:300px;width:280px;position:absolute;left:1003px'>
                 <table id='memoryusage-table' class="gridtable" toolbar="#tb"
                                 data-options="border:false,singleSelect:true,fit:true,fitColumns:true,onLoadSuccess:function(data){ MergeCells('memoryusage-table','itemid');}">
                     <thead>
@@ -191,7 +193,7 @@ table.gridtable td {
                                 
                                 value: memoryuse_total[i] ? (memoryuse_used[i]/memoryuse_total[i]).toFixed(2) : 0,
                                 xAxis:i,
-                                yAxis:(memoryuse_total[i]+5000000)
+                                yAxis:(memoryuse_total[i]+5500000)
                             }
                             //alert(o);
                             mark.push(o);
@@ -283,12 +285,34 @@ table.gridtable td {
                 );
 
         </script>
-        
-            <div style='position:relative;'>
-        	   <div id="cpuusage" style="height:700px;width:1300px;"></div>
-            </div>  
-        
-        <!-- ECharts单文件引入 -->
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+       <div style="position:relative;height:600px;">
+            <div id="cpuusage" style="height:600px;width:1000px;position:absolute;top:0;left:0;border:2px solid;border-color:#666666;"></div>
+            <div id='cpuusage_form' style='height:300px;width:280px;position:absolute;left:1003px'>
+                <table id='cpuusage-table' class="gridtable" toolbar="#tb"
+                                data-options="border:false,singleSelect:true,fit:true,fitColumns:true,onLoadSuccess:function(data){ MergeCells('cpuusage-table','itemid');}">
+                    <thead>
+                        <tr>
+                            <th data-options="field:'itemid'" width="60" sortable="true">主机</th>
+                            <th data-options="field:'productid'" width="70">CPU利用率</th>                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                            {% for cpu in cpuloaduse_object %}
+                            <tr>
+                            <td>{{cpu.name}}</td>
+                            <td>{{cpu.percentage}}</td>
+                            </tr>
+                            {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+                <!-- ECharts单文件引入 -->
         <script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
         <script type="text/javascript">
                 // 路径配置
@@ -301,83 +325,112 @@ table.gridtable td {
                 require(
                     [
                         'echarts',
-                        'echarts/chart/pie' // 使用柱状图就加载bar模块，按需加载
+                        'echarts/chart/bar' // 使用柱状图就加载bar模块，按需加载
                        
                     ],
                     function (ec) {
-                        // 基于准备好的dom，初始化echarts图表
+                        // 基于准备好的dom，初始化echarts图表 
+                        var cpu_name = new Array(); 
+                        var cpu_total = new Array();                      
+                        {% for name in cpuloaduse_name %}
+                          cpu_name.push('{{name}}');
+                          cpu_total.push(0.99999);
+                        {% endfor %}
+                        
+
+                        var cpu_used = new Array();
+                        {% for used in cpuloaduse_used %}
+                          cpu_used.push({{used}});
+                        {% endfor %}
+                       
+                        
                         var myChart = ec.init(document.getElementById('cpuusage')); 
                         var option = {
                             title : {
-                                text: 'cpu使用情况',
-                                subtext: '5min内使用情况统计',
-                                x:'center'
+                                text: '各主机CPU使用情况',
+                                subtext: 'by 清华云平台'
                             },
                             tooltip : {
-                                trigger: 'item',
-                                formatter: "{a} <br/>{b} : {c} ({d}%)"
+                                trigger: 'axis'
                             },
                             legend: {
-                                orient : 'vertical',
-                                x : 'left',
-                                data:['{{cpuloaduse_name.0}}','{{cpuloaduse_name.1}}','{{cpuloaduse_name.2}}','{{cpuloaduse_name.3}}','{{cpuloaduse_name.4}}']
+                                data:[
+                                    'CPU使用情况－已用','',
+                                    'CPU使用情况－总量'        ]
                             },
-                            color : [ 
-                            '#6495ed','#87cefa', '#da70d6', '#32cd32', '#6495ed', 
-                            '#ff69b4', '#ba55d3', '#cd5c5c', '#ffa500', '#40e0d0', 
-                            '#1e90ff', '#ff6347', '#7b68ee', '#00fa9a', '#ffd700', 
-                            '#6b8e23', '#ff00ff', '#3cb371', '#b8860b', '#30e0e0' 
-                             ],
-
                             toolbox: {
                                 show : true,
                                 feature : {
                                     mark : {show: true},
                                     dataView : {show: true, readOnly: false},
-                                    magicType : {
-                                        show: true, 
-                                        type: ['pie', 'funnel'],
-                                        option: {
-                                            funnel: {
-                                                x: '25%',
-                                                width: '50%',
-                                                funnelAlign: 'left',
-
-                                            }
-                                        }
-                                    },
+                                    magicType : {show: true, type: ['line', 'bar']},
                                     restore : {show: true},
                                     saveAsImage : {show: true}
                                 }
                             },
                             calculable : true,
-                            series : [
-                                {
-                                    name:'访问来源',
-                                    type:'pie',
-                                    radius : '55%',
-                                    center: ['50%', '60%'],
-                                    data:[
-                                        {value:{{cpuloaduse_used.0}}, name:'{{cpuloaduse_name.0}}'},
-                                        {value:{{cpuloaduse_used.1}}, name:'{{cpuloaduse_name.1}}'},
-                                        {value:{{cpuloaduse_used.2}}, name:'{{cpuloaduse_name.2}}'},
-                                        {value:{{cpuloaduse_used.3}}, name:'{{cpuloaduse_name.3}}'},
-                                        {value:{{cpuloaduse_used.4}}, name:'{{cpuloaduse_name.4}}'}
-                                    ]
-                                }
-                            ]
-                        };
                             
+                            xAxis : [
+                                {
+                                    type : 'category',
+                                    data : cpu_name
+                                },
+                                {
+                                    type : 'category',
+                                    axisLine: {show:false},
+                                    axisTick: {show:false},
+                                    axisLabel: {show:false},
+                                    splitArea: {show:false},
+                                    splitLine: {show:false},
+                                    data : cpu_name
+                                }
+                            ],
+                            yAxis : [
+                                {
+                                    type : 'value',
+                                    axisLabel:{formatter:'{value}'}
+                                }
+                            ],
+                            series : [
+                              
+                                {
+                                    name:'CPU使用情况－利用率',
+                                    type:'bar',
+                                    itemStyle: {normal: {color:'rgba(255,255,0,1)', label:{show:true,textStyle:{color:'#27727B'}}, formatter:'{c} %'}},
+                                    data:cpu_used
+                                },
+                           
+
+                                {
+                                    name:'CPU使用情况－总量',
+                                    type:'bar',
+                                    xAxisIndex:1,
+                                    itemStyle: {normal: {color:'rgba(255,255,0,0.2)'}},
+                                    data:cpu_total
+                                       
+                                    
+                                },
+                                
+                            ]
+
+
+                        };
+           
                         // 为echarts对象加载数据 
                         myChart.setOption(option); 
                     }
                 );
 
-        </script>
+        </script>        
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
     
         <div style="position:relative;height:600px;">
-            <div id="diskusage" style="height:600px;width:1000px;position:absolute;top:0;left:0"></div>
-            <div id='diskusage_form' style='height:300px;width:280px;float:right;'>
+            <div id="diskusage" style="height:600px;width:1000px;position:absolute;top:0;left:0;border:2px solid;border-color:#666666;"></div>
+            <div id='diskusage_form' style='height:300px;width:280px;position:absolute;left:1003px;'>
                 <table id='diskusage-table' class="gridtable" toolbar="#tb"
                                 data-options="border:false,singleSelect:true,fit:true,fitColumns:true,onLoadSuccess:function(data){ MergeCells('diskusage-table','itemid');}">
                     <thead>
@@ -453,7 +506,7 @@ table.gridtable td {
                             var o = {
                                 value: disk_total[i] ? (disk_used[i]/disk_total[i]).toFixed(2) : 0,
                                 xAxis:i,
-                                yAxis:(disk_total[i]+100000)
+                                yAxis:(disk_total[i]+200000)
                             }
                             //alert(o);
                             mark.push(o);
@@ -525,7 +578,7 @@ table.gridtable td {
 
                                     markPoint : {
                                         data : mark,
-                                        itemStyle: {normal: {color:'rgba(255,106,106,0.8)', label:{show:true},borderWidth:10},
+                                        itemStyle: {normal: {color:'rgba(255,106,106,0.8)', label:{show:true},borderWidth:15},
                                         
 
 
@@ -545,10 +598,14 @@ table.gridtable td {
                 );
 
         </script>
-
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
         <div style="position:relative;height:600px;">
-            <div id="processusage" style="height:600px;width:1000px;position:absolute;top:0;left:0"></div>
-            <div id='processusage_form' style='height:300px;width:280px;float:right;'>
+            <div id="processusage" style="height:600px;width:1000px;position:absolute;top:0;left:0;border:2px solid;border-color:#666666;"></div>
+            <div id='processusage_form' style='height:300px;width:280px;position:absolute;left:1003px;'>
                 <table id='processusage-table' class="gridtable" toolbar="#tb"
                                 data-options="border:false,singleSelect:true,fit:true,fitColumns:true,onLoadSuccess:function(data){ MergeCells('processusage-table','itemid');}">
                     <thead>
@@ -647,6 +704,7 @@ table.gridtable td {
                                     name:'',
                                     type:'bar',
                                     data: pro_used,
+                                    itemStyle: {normal: {color:'rgba(255,255,0,1)', label:{show:true,textStyle:{color:'#27727B'}}, formatter:'{c} %'}},
                                 },
                                     ]
                         };
@@ -655,6 +713,141 @@ table.gridtable td {
                         myChart.setOption(option); 
                     }
                 );
+
+        </script>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+        <div style="position:relative;height:600px;">
+            <div id="ethusage" style="height:600px;width:1000px;position:absolute;top:0;left:0;border:2px solid;border-color:#666666;"></div>
+            <div id='ethusage_form' style='height:300px;width:280px;position:absolute;left:1003px;'>
+                <table id='ethusage-table' class="gridtable" toolbar="#tb"
+                                data-options="border:false,singleSelect:true,fit:true,fitColumns:true,onLoadSuccess:function(data){ MergeCells('ethusage-table','itemid');}">
+                    <thead>
+                        <tr>
+                            <th data-options="field:'itemid'" width="60" sortable="true">主机</th>
+                            <th data-options="field:'productid'" width="70">In (Kbps)</th>
+                            <th data-options="field:'productid'" width="70">Out (Kbps)</th>
+                            
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                            {% for eth in eth_object %}
+                            <tr>
+                            <td>{{eth.name}}</td>
+                            <td>{{eth.in}}</td>
+                            <td>{{eth.out}}</td>
+                            
+                            
+                            </tr>
+                            {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div> 
+        <!-- ECharts单文件引入 -->
+        <script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+        <script type="text/javascript">
+                // 路径配置
+                require.config({
+                    paths: {
+                        echarts: 'http://echarts.baidu.com/build/dist'
+                    }
+                });
+        // 使用
+                require(
+                    [
+                        'echarts',
+                        'echarts/chart/bar' // 使用柱状图就加载bar模块，按需加载
+                       
+                    ],
+                    function (ec) {
+                        // 基于准备好的dom，初始化echarts图表
+                        var myChart = ec.init(document.getElementById('ethusage')); 
+                        var eth_in = new Array();
+                        {% for eth in eth_in %}
+                          eth_in.push({{eth}});
+                        {% endfor %}
+
+                        var eth_out = new Array();
+                        {% for eth in eth_out %}
+                          eth_out.push({{eth}});
+                        {% endfor %}
+
+                        var eth_name = new Array();
+                        {% for name in eth_name %}
+                          eth_name.push('{{name}}');
+                        {% endfor %}
+
+                        var option = {
+                            title : {
+                                text: '各主机网络I/O',
+                                subtext: 'by 清华云平台'
+                            },
+                            tooltip : {
+                                trigger: 'axis'
+                            },
+                            legend: {
+                                data:['网络I/O-In','网络I/O-Out']
+                            },
+                            toolbox: {
+                                show : true,
+                                feature : {
+                                    mark : {show: true},
+                                    dataView : {show: true, readOnly: false},
+                                    magicType : {show: true, type: ['line', 'bar']},
+                                    restore : {show: true},
+                                    saveAsImage : {show: true}
+                                }
+                            },
+                            calculable : true,
+                            xAxis : [
+                                {
+                                    type : 'category',
+                                    data : eth_name
+                                }
+                            ],
+                            yAxis : [
+                                {
+                                    type : 'value'
+                                }
+                            ],
+                            series : [
+                                {
+                                    name:'网络I/O-IN',
+                                    type:'bar',
+                                    data:eth_in,
+                                    markPoint : {
+                                        data : [
+                                            {type : 'max', name: '最大值'},
+                                            {type : 'min', name: '最小值'}
+                                        ]
+                                    }
+                                    
+                                },
+                                {
+                                    name:'网络I/O-Out',
+                                    type:'bar',
+                                    data:eth_out,
+                                    markPoint : {
+                                        data : [
+                                            {type : 'max', name: '最大值'},
+                                            {type : 'min', name: '最小值'}
+                                        ]
+                                    }                                   
+                                    
+                                }
+                            ]
+                        };
+           
+                        // 为echarts对象加载数据 
+                        myChart.setOption(option); 
+                    }
+                );
+                        
 
         </script>
     </div>
