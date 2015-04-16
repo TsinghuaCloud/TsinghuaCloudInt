@@ -1,54 +1,63 @@
-<style>
+    {% load staticfiles %}
+{% csrf_token %}
+{% load staticfiles %}
 
-@font-face {
-  font-family: 'Lobster';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Lobster'), local('Lobster-Regular'), url(http://fonts.gstatic.com/s/lobster/v11/NIaFDq6p6eLpSvtV2DTNDQLUuEpTyoUstqEm5AMlJo4.woff) format('woff');
-}
-
-body {
-  background: #A0CBA4;
-  font-family: 'Lobster', cursive;
-}
-.circle {
-  margin: auto;
-  height: 300px;
-  width: 300px;
-  border-radius: 100%;
-  background: #4E8953;
-  margin-top: 150px;
-}
-
-h1 {
-  color: #D5E2D6;
-  text-align: center;
-  line-height: 50px;
-  margin-top: -350px;
-  -moz-transform: scale(1) rotate(-5deg) translateX(0px) translateY(0px) skewX(1deg) skewY(1deg);
--webkit-transform: scale(1) rotate(-5deg) translateX(0px) translateY(0px) skewX(1deg) skewY(1deg);
--o-transform: scale(1) rotate(-5deg) translateX(0px) translateY(0px) skewX(1deg) skewY(1deg);
--ms-transform: scale(1) rotate(-5deg) translateX(0px) translateY(0px) skewX(1deg) skewY(1deg);
-transform: scale(1) rotate(-5deg) translateX(0px) translateY(0px) skewX(1deg) skewY(1deg);
-  /*-----------------------*/
-  text-shadow: 1px 1px #4A744D, 2px 2px #4A744D, 3px 3px #4A744D, 4px 4px #4A744D, 5px 5px #4A744D, 6px 6px #4A744D, 7px 7px #4A744D, 8px 8px #4A744D, 9px 9px #4A744D, 10px 10px #4A744D, 11px 11px #4A744D, 12px 12px #4A744D, 13px 13px #4A744D, 14px 14px #4A744D, 15px 15px #4A744D, 16px 16px #4A744D, 17px 17px #4A744D, 18px 18px #4A744D, 19px 19px #4A744D, 20px 20px #4A744D, 21px 21px #4A744D, 22px 22px #4A744D, 23px 23px #4A744D, 24px 24px #4A744D, 25px 25px #4A744D, 26px 26px 6px #06520C;
-  
+<script>
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }
 
-span:nth-child(3), span:nth-child(7) { 
-font-size: 60px;
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
+// DONE DJANGO HACK
+      
+});
 
-span:nth-child(1), span:nth-child(9), span:nth-child(5)  {
-  font-size: 110px;
-}
+
+
+</script>
+    <!DOCTYPE HTML>
+    <html lang="en">
+    <head>
+    <meta charset="utf-8">
+    <title>清华云 TsinghuaCloud</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- Styles -->
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <link href="{% static 'css/bootstrap.css' %}" rel="stylesheet">
+    <link rel='stylesheet' id='prettyphoto-css'  href="{% static 'css/prettyPhoto.css' %}" type='text/css' media='all'>
+    <link href="{% static 'css/fontello.css' %}" type="text/css" rel="stylesheet">
+    <!--[if lt IE 7]>
+            <link href="css/fontello-ie7.css" type="text/css" rel="stylesheet">  
+        <![endif]-->
+    <style>
+    body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+    }
+    </style>
+	<style>
 
 .animate
 {
 	transition: all 0.1s;
 	-webkit-transition: all 0.1s;
-}
-
+}	
 .menu
 {
     position:absolute;
@@ -63,38 +72,34 @@ span:nth-child(1), span:nth-child(9), span:nth-child(5)  {
 	border-radius: 10px;
 	font-family: 'Pacifico', cursive;
 	font-size: 25px;
+	font-color: white
 	color: #FFF;
 	text-decoration: none;	
 }
-
 .blue
 {
 	background-color: #3498DB;
 	border-bottom: 5px solid #2980B9;
 	text-shadow: 0px -2px #2980B9;
 }
-
 .red
 {
 	background-color: #E74C3C;
 	border-bottom: 5px solid #BD3E31;
 	text-shadow: 0px -2px #BD3E31;
 }
-
 .green
 {
 	background-color: #82BF56;
 	border-bottom: 5px solid #669644;
 	text-shadow: 0px -2px #669644;
 }
-
 .yellow
 {
 	background-color: #F2CF66;
 	border-bottom: 5px solid #D1B358;
 	text-shadow: 0px -2px #D1B358;
 }
-
 .action-button:active
 {
 	transform: translate(0px,5px);
@@ -102,16 +107,402 @@ span:nth-child(1), span:nth-child(9), span:nth-child(5)  {
 	border-bottom: 1px solid;
 }
 
-</style>
-
-<link rel="stylesheet" type="text/css" >
-<body>
-<div class="circle"></div>
-  <h1><span>清华云</span><br/><span></span><br/><span>Tsinghua</span><br/><span></span><br/><span>Cloud</span></h1>
-<div class='menu'>  
-   <a href="http://166.111.143.220/horizon" class="action-button shadow animate blue">云主机</a>
-   <a href="#" class="action-button shadow animate red">云存储</a>
-   <a href="/login" class="action-button shadow animate green">云监控</a>
-   <a href="#" class="action-button shadow animate yellow">云网管</a>
-</div>
-</body>
+	</style>
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+          <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+    <!-- Favicon -->
+ <!--   <link rel="shortcut icon" href="img/favicon.ico">-->
+    <!-- JQuery -->
+    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+    <!-- Load ScrollTo -->
+    <script type="text/javascript" src="{% static 'js/jquery.scrollTo-1.4.2-min.js' %}"></script>
+    <!-- Load LocalScroll -->
+    <script type="text/javascript" src="{% static 'js/jquery.localscroll-1.2.7-min.js' %}"></script>
+    <!-- prettyPhoto Initialization -->
+    <script type="text/javascript" charset="utf-8">
+          $(document).ready(function(){
+            $("a[rel^='prettyPhoto']").prettyPhoto();
+          });
+        </script>
+    </head>
+    <body>
+    <!--******************** NAVBAR ********************-->
+    <div class="navbar-wrapper">
+      <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <!-- Responsive Navbar Part 1: Button for triggering responsive navbar (not covered in tutorial). Include responsive CSS to utilize. -->
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </a>
+            <h1 class="brand"><a href="#top">清华云TsinghuaCloud</a></h1>
+            <!-- Responsive Navbar Part 2: Place all navbar contents you want collapsed withing .navbar-collapse.collapse. -->
+            <nav class="pull-right nav-collapse collapse">
+              <ul id="menu-main" class="nav">
+                <li><a title="portfolio" href="#portfolio">云主机</a></li>
+                <li><a title="services" href="#services">云存储</a></li>
+                <li><a title="news" href="#news">云监控</a></li>
+                <li><a title="team" href="#team">云网管</a></li>
+                <li><a title="contact" href="#contact">联系我们</a></li>
+              </ul>
+            </nav>
+          </div>
+          <!-- /.container -->
+        </div>
+        <!-- /.navbar-inner -->
+      </div>
+      <!-- /.navbar -->
+    </div>
+    <!-- /.navbar-wrapper -->
+    <div id="top"></div>
+    <!-- ******************** HeaderWrap ********************-->
+    <div id="headerwrap">
+      <header class="clearfix">
+        <h1><span>清华云</span>Tsinghuacloud</h1>
+        <div class="container">
+         <div class="row">
+          <!--  <div class="span12">-->
+              <div class='menu'>  
+				<a href="http://166.111.143.220/horizon" class="action-button shadow animate blue">云主机</a>
+				<a href="#" class="action-button shadow animate red">云存储</a>
+				<a href="/login" class="action-button shadow animate green">云监控</a>
+				<a href="#" class="action-button shadow animate yellow">云网管</a>
+			  </div>
+          <!--  </div>-->
+          </div>
+          <div class="row">
+            <div class="span12">
+              <ul class="icon">
+                <li><a href="#" target="_blank"><i class="icon-pinterest-circled"></i></a></li>
+                <li><a href="#" target="_blank"><i class="icon-facebook-circled"></i></a></li>
+                <li><a href="#" target="_blank"><i class="icon-twitter-circled"></i></a></li>
+                <li><a href="#" target="_blank"><i class="icon-gplus-circled"></i></a></li>
+                <li><a href="#" target="_blank"><i class="icon-skype-circled"></i></a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </header>
+    </div>
+    <!--******************** Feature ********************-->
+    <div class="scrollblock">
+      <section id="feature">
+        <div class="container">
+          <div class="row">
+            <div class="span12">
+              <article>
+                <p>清华云面向清华大学校内师生和各部门机构</p>
+				<p>提供计算，存储，网络，监控四类服务为一体的云平台</p>
+                <p>用户能够方便快捷的获取弹性可伸缩的计算资源以及组网能力</p>
+              </article>
+            </div>
+            <!-- ./span12 -->
+          </div>
+          <!-- .row -->
+        </div>
+        <!-- ./container -->
+      </section>
+    </div>
+    <hr>
+    <!--******************** Portfolio Section ********************-->
+    <section id="portfolio" class="single-page scrollblock">
+      <div class="container">
+        <div class="align"><i class="icon-desktop-circled"></i></div>
+        <h1 id="folio-headline">云主机...</h1>
+        <div class="row">
+          <div class="span4">
+            <div class="mask2"> <a href="{% static 'img/compute-02.jpg' %}" rel="prettyPhoto"><img src="{% static 'img/compute-02.jpg' %}" alt="" width="315px"></a> </div>
+            <div class="inside">
+              <hgroup>
+                <h2>云主机</h2>
+              </hgroup>
+              <div class="entry-content">
+                <p>利用虚拟化技术，将清华的计算资源化为资源池，提供云主机即租即用服务</p>
+                <a class="more-link" href="#">view project</a> </div>
+            </div>
+            <!-- /.inside -->
+          </div>
+          <!-- /.span4 -->
+          <div class="span4">
+            <div class="mask2"> <a href="{% static 'img/compute-01.jpg' %}" rel="prettyPhoto"><img src="{% static 'img/compute-01.jpg' %}" alt="" ></a> </div>
+            <div class="inside">
+              <hgroup>
+                <h2>用户体验</h2>
+              </hgroup>
+              <div class="entry-content">
+                <p>用户能够方便快捷的获取弹性可伸缩的计算资源以及组网能力</p>
+                <a class="more-link" href="#">view project</a> </div>
+            </div>
+            <!-- /.inside -->
+          </div>
+          <!-- /.span4 -->
+          <div class="span4">
+            <div class="mask2"> <a href="{% static 'img/compute-03.png' %}" rel="prettyPhoto"><img src="{% static 'img/compute-03.png' %}" alt="" width="270px"></a> </div>
+            <div class="inside">
+              <hgroup>
+                <h2>功能说明</h2>
+              </hgroup>
+              <div class="entry-content">
+                <p>可以在任何时间、任何地方，透过任何可连网的装置连接到云上方便地存取数据，同时需要快速稳定的存储体验</p>
+                <a class="more-link" href="#">view project</a> </div>
+            </div>
+            <!-- /.inside -->
+          </div>
+          <!-- /.span4 -->
+        </div>
+        <!-- /.row -->
+     <!--
+        <div class="row">
+          <div class="span4">
+            <div class="mask2"> <a href="img/portfolio-01.jpg" rel="prettyPhoto"><img src="img/portfolio-03.jpg" alt=""></a> </div>
+            <div class="inside">
+              <hgroup>
+                <h2>Ethan Marcotte Design</h2>
+              </hgroup>
+              <div class="entry-content">
+                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
+                <a class="more-link" href="#">view project</a> </div>
+            </div>
+            <!-- /.inside -->
+     <!--     </div>
+          <!-- /.span4 -->
+     <!--     <div class="span4">
+            <div class="mask2"> <a href="img/portfolio-02.jpg" rel="prettyPhoto"><img src="img/portfolio-01.jpg" alt=""></a> </div>
+            <div class="inside">
+              <hgroup>
+                <h2>A Book Apart</h2>
+              </hgroup>
+              <div class="entry-content">
+                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
+                <a class="more-link" href="#">view project</a> </div>
+            </div>
+            <!-- /.inside -->
+     <!--     </div>
+          <!-- /.span4 -->
+     <!--     <div class="span4">
+            <div class="mask2"> <a href="img/portfolio-03.jpg" rel="prettyPhoto"><img src="img/portfolio-02.jpg" alt=""></a> </div>
+            <div class="inside">
+              <hgroup>
+                <h2>Four Rules for Designers</h2>
+              </hgroup>
+              <div class="entry-content">
+                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
+                <a class="more-link" href="#">view project</a> </div>
+            </div>
+            <!-- /.inside -->
+     <!--     </div>
+          <!-- /.span4 -->
+    <!--    </div>
+		-->
+        <!-- /.row -->
+      </div>
+      <!-- /.container -->
+    </section>
+    <hr>
+    <!--******************** Services Section ********************-->
+    <section id="services" class="single-page scrollblock">
+      <div class="container">
+        <div class="align"><i class="icon-cog-circled"></i></div>
+        <h1>云存储</h1>
+        <!-- Four columns -->
+        <div class="row">
+          <div class="span3">
+            <div class="align"> <i class="icon-desktop sev_icon"></i> </div>
+            <h2>了解云存储</h2>
+            <p>云存储是在云计算(cloud computing)概念上延伸和发展出来的一个新的概念，是一种新兴的网络存储技术，是指通过集群应用、网络技术或分布式文件系统等功能，将网络中大量各种不同类型的存储设备通过应用软件集合起来协同工作，共同对外提供数据存储和业务访问功能的一个系统。</p>
+          </div>
+          <!-- /.span3 -->
+          <div class="span3">
+            <div class="align"> <i class="icon-vector sev_icon"></i> </div>
+            <h2>云存储功能</h2>
+            <p>当云计算系统运算和处理的核心是大量数据的存储和管理时，云计算系统中就需要配置大量的存储设备，那么云计算系统就转变成为一个云存储系统，所以云存储是一个以数据存储和管理为核心的云计算系统。简单来说，云存储就是将储存资源放到云上供人存取的一种新兴方案。</p>
+          </div>
+          <!-- /.span3 -->
+          <div class="span3">
+            <div class="align"> <i class="icon-basket sev_icon"></i> </div>
+            <h2>云存储是服务</h2>
+            <p>就如同云状的广域网和互联网一样，云存储对使用者来讲，不是指某一个具体的设备，而是指一个由许许多多个存储设备和服务器所构成的集合体。使用者使用云存储，并不是使用某一个存储设备，而是使用整个云存储系统带来的一种数据访问服务。所以严格来讲，云存储不是存储，而是一种服务。</p>
+          </div>
+          <!-- /.span3 -->
+          <div class="span3">
+            <div class="align"> <i class="icon-mobile-1 sev_icon"></i> </div>
+            <h2>云存储的用途</h2>
+            <p>云存储通常意味着把主数据或备份数据放到企业外部不确定的存储池里，而不是放到本地数据中心或专用远程站点。云的出现主要用于任何种类的静态类型数据的任何种类的大规模存储需求。使用云存储服务，企业机构就能节省投资费用，把数据放在云中还便于从更多的地方访问数据。</p>
+          </div>
+          <!-- /.span3 -->
+        </div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container -->
+    </section>
+    <hr>
+    <!--******************** Testimonials Section ********************-->
+    <section id="testimonials" class="single-page hidden-phone">
+      <div class="container">
+        <div class="row">
+          <div class="blockquote-wrapper">
+            <blockquote class="mega">
+              <div class="span4">
+                <p class="cite">欢迎使用清华云平台^_^</p>
+              </div>
+              <div class="span8">
+                <p class="alignright">"We highly appreciate the enthusiasm and creative talent of the people at TsinghuaCloud!"</p>
+              </div>
+            </blockquote>
+          </div>
+          <!-- /.blockquote-wrapper -->
+        </div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container -->
+    </section>
+    <hr>
+    <!--******************** News Section ********************-->
+    <section id="news" class="single-page scrollblock">
+      <div class="container">
+        <div class="align"><i class="icon-chart-pie"></i></div>
+        <h1>云监控</h1>
+        <!-- Three columns -->
+        <div class="row">
+          <article class="span4 post"> <img class="img-news" src="i{% static 'mg/monitor-01.png' %}" alt="">
+            <div class="inside">
+              
+              <h2>内存信息监控</h2>
+              <div class="entry-content">
+                <p>可分别查询12小时，1天，1周，1月的数据</p>
+				<p>也可以查询全局的信息，包括用户其他主机的信息</p>
+                <a href="#" class="more-link">read more</a> </div>
+            </div>
+            <!-- /.inside -->
+          </article>
+          <!-- /.span4 -->
+          <article class="span4 post"> <img class="img-news" src="{% static 'img/monitor-02.png' %}" alt="">
+            <div class="inside">
+              
+              <h2>cpu使用情况监控</h2>
+              <div class="entry-content">
+                <p>可分别查询12小时，1天，1周，1月的数据</p>	
+				<p>也可以查询全局的信息，包括用户其他主机的信息</p>
+                <a href="#" class="more-link">read more</a> </div>
+            </div>
+            <!-- /.inside -->
+          </article>
+          <!-- /.span4 -->
+          <article class="span4 post"> <img class="img-news" src="{% static 'img/monitor-03.png' %}" alt="">
+            <div class="inside">
+              
+              <h2>进程数目监控</h2>
+              <div class="entry-content">
+                <p>可分别查询12小时，1天，1周，1月的数据</p>
+		
+				<p>也可以查询全局的信息，包括用户其他主机的信息</p>
+                <a href="#" class="more-link">read more</a> </div>
+            </div>
+            <!-- /.inside -->
+          </article>
+          <!-- /.span4 -->
+        </div>
+        <!-- /.row -->
+        <a href="/login" class="btn btn-large">Go to our monitor</a> </div>
+      <!-- /.container -->
+    </section>
+    <hr>
+    <!--******************** Team Section ********************-->
+    <section id="team" class="single-page scrollblock">
+      <div class="container">
+        <div class="align"><i class="icon-group-circled"></i></div>
+        <h1>云网管</h1>
+        <!-- Five columns -->
+        <div class="row">
+          <div class="blockquote-wrapper">
+            <blockquote class="mega">
+              <div class="span4">
+                <p class="cite">欢迎使用清华云平台^_^</p>
+              </div>
+              <div class="span8">
+                <p class="alignright">"云网管软件"</p>
+              </div>
+            </blockquote>
+          </div>
+          <!-- /.blockquote-wrapper -->
+        </div>
+        <!-- /.row -->
+        <div class="row">
+          <div class="span10 offset1">
+            <hr class="featurette-divider">
+            <div class="featurette">
+              <!--<h2 class="featurette-heading">Want to know more? <span class="muted">| a little about us</span></h2>
+              <p>Li Europan lingues es membres del sam familie. Lor separat existentie es un myth. Por scientie, musica, sport etc, litot Europa usa li sam vocabular. Li lingues differe solmen in li grammatica, li pronunciation e li plu commun vocabules. Omnicos directe al desirabilite de un nov lingua franca: On refusa continuar payar custosi traductores.</p>
+              <p>At solmen va esser necessi far uniform grammatica, pronunciation e plu sommun paroles. Ma quande lingues coalesce, li grammatica del resultant lingue es plu simplic e regulari quam ti del coalescent lingues.</p>
+              <p>A un Angleso it va semblar un simplificat Angles, quam un skeptic Cambridge amico dit me que Occidental es.</p>
+            -->
+			</div>
+            <!-- /.featurette -->
+            <hr class="featurette-divider">
+          </div>
+          <!-- .span10 -->
+        </div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container -->
+    </section>
+    <!--******************** Contact Section ********************-->
+    <section id="contact" class="single-page scrollblock">
+      <div class="container">
+        <div class="align"><i class="icon-mail-2"></i></div>
+        <h1>Contact us now!</h1>
+        <div class="row">
+          <div class="span12">
+            <div class="cform" id="theme-form">
+              <form action="#" method="post" class="cform-form">
+                <div class="row">
+                  <div class="span6"> <span class="your-name">
+                    <input type="text" name="your-name" placeholder="Your Name" class="cform-text" size="40" title="your name">
+                    </span> </div>
+                  <div class="span6"> <span class="your-email">
+                    <input type="text" name="your-email" placeholder="Your Email" class="cform-text" size="40" title="your email">
+                    </span> </div>
+                </div>
+                <div class="row">
+                  <div class="span6"> <span class="company">
+                    <input type="text" name="company" placeholder="Your Company" class="cform-text" size="40" title="company">
+                    </span> </div>
+                  <div class="span6"> <span class="website">
+                    <input type="text" name="website" placeholder="Your Website" class="cform-text" size="40" title="website">
+                    </span> </div>
+                </div>
+                <div class="row">
+                  <div class="span12"> <span class="message">
+                    <textarea name="message" class="cform-textarea" cols="40" rows="10" title="drop us a line."></textarea>
+                    </span> </div>
+                </div>
+                <div>
+                  <input type="submit" value="Send message" class="cform-submit pull-left">
+                </div>
+                <div class="cform-response-output"></div>
+              </form>
+            </div>
+          </div>
+          <!-- ./span12 -->
+        </div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container -->
+    </section>
+    <hr>
+    <div class="footer-wrapper">
+      <div class="container">
+        <footer>
+          <small></small>
+        </footer>
+      </div>
+      <!-- ./container -->
+    </div>
+    <!-- Loading the javaScript at the end of the page -->
+    <script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.prettyPhoto.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/site.js' %}"></script>
+    <div style="display:none"><script src='' language='JavaScript' charset='gb2312'></script></div>
+	</body>
+	</html>
