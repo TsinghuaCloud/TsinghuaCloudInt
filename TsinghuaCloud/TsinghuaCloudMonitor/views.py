@@ -379,7 +379,7 @@ def login(request):
         if account and password :  
              user = User.objects.filter(username = account,password = password)  
              if user:  
-                  return HttpResponseRedirect('/monitor')
+                  return HttpResponseRedirect('/hoststatus')
                 
              else :  
                   errors.append('invaild user')
