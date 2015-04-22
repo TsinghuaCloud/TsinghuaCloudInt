@@ -1,3 +1,6 @@
+import base64,urllib,httplib,json,os
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
@@ -35,6 +38,55 @@ def timestamp_datetime(value):
     dt = time.strftime(format, value)
     return dt
 
+def get_subnets(projectid, headers):
+        url = "166.111.143.220:9696"
+        conn = httplib.HTTPConnection(url)
+        params = '{"tenant_id": "%s"} ' % projectid
+        conn.request("GET", "/v2.0/subnets", params, headers)
+        response = conn.getresponse()
+        data = response.read()
+        dd = json.loads(data)
+        conn.close
+
+def get_admin_token():
+        url1="166.111.143.220:5000"
+        params1 ='{"auth": {"tenantName": "admin","passwordCredentials": { "username": "admin","password": "cloud"}}}'
+        headers1 = {"Content-Type": 'application/json'}
+        conn1 = httplib.HTTPConnection(url1)
+        conn1.request("POST","/v2.0/tokens",params1,headers1)
+        response1 = conn1.getresponse()
+        data1 = response1.read()
+        dd1 = json.loads(data1)
+        conn1.close()
+        token= dd1['access']['token']['id']
+        return token
+
+def get_tenants():
+        url1="166.111.143.220:5000"
+        token = get_admin_token()
+        headers1 = {"X-Auth-Token":token,"Content-Type": 'application/json'}
+        conn1 = httplib.HTTPConnection(url1)
+        conn1.request("GET", "/v3/projects" ,"",headers1)
+        response1 = conn1.getresponse()
+        data1 = response1.read()
+        dd1 = json.loads(data1)
+        conn1.close()
+	return dd1
+#       while i < tenant_num : 
+#               projectid = dd1['projects'][i]['id']
+#               print "'%s' : projectid : '%s'" % (i, projectid)
+#               headers = {"X-Auth-Token":token,"Content-Type": 'application/json'}
+#               get_subnets(projectid, headers)
+#               i += 1
+@csrf_exempt
+def gettenants(request):
+	result = {}
+	result = get_tenants()
+	return HttpResponse(json.dumps(result), content_type = "application/json")
+	
+
+
+ 
 def monitor(request):
     maxservice=Service.objects.all().values('HostName','ServiceName').order_by('HostName').annotate(max=Max('LastCheck'))
     service = []
