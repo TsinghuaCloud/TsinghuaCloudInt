@@ -38,15 +38,44 @@ def timestamp_datetime(value):
     dt = time.strftime(format, value)
     return dt
 
-def get_subnets(projectid, headers):
+def get_ports(headers):
         url = "166.111.143.220:9696"
         conn = httplib.HTTPConnection(url)
-        params = '{"tenant_id": "%s"} ' % projectid
-        conn.request("GET", "/v2.0/subnets", params, headers)
+        conn.request("GET", "/v2.0/ports", "", headers)
         response = conn.getresponse()
         data = response.read()
         dd = json.loads(data)
         conn.close
+        return dd
+
+def get_one_subnet_instances(subnetid, headers):
+        res = []
+        ports = get_ports(headers)
+        for port in ports['ports']:
+                if port['fixed_ips'][0]['subnet_id'] == subnetid and port['status'] == 'ACTIVE' and port['device_owner'] == 'compute:None':
+                        res.append(port)
+        return res
+
+def get_subnets( headers):
+        url = "166.111.143.220:9696"
+        conn = httplib.HTTPConnection(url)
+#       params = '{"tenant_id": "%s"} ' % projectid
+        conn.request("GET", "/v2.0/subnets", "", headers)
+        response = conn.getresponse()
+        data = response.read()
+        dd = json.loads(data)
+        conn.close
+        return dd
+
+def get_one_tenant_subnets(projectid, headers):
+        res = []
+        subnets = get_subnets(headers)
+        for subnet in subnets['subnets']:
+                if subnet['tenant_id'] == projectid :
+                        res.append(subnet)
+        return res
+
+
 
 def get_admin_token():
         url1="166.111.143.220:5000"
@@ -72,21 +101,40 @@ def get_tenants():
         dd1 = json.loads(data1)
         conn1.close()
 	return dd1
-#       while i < tenant_num : 
-#               projectid = dd1['projects'][i]['id']
-#               print "'%s' : projectid : '%s'" % (i, projectid)
-#               headers = {"X-Auth-Token":token,"Content-Type": 'application/json'}
-#               get_subnets(projectid, headers)
-#               i += 1
+
 @csrf_exempt
 def gettenants(request):
 	result = {}
 	result = get_tenants()
 	return HttpResponse(json.dumps(result), content_type = "application/json")
-	
+@csrf_exempt	
 
+def getsubnets(request):
+	result = {}
+	token = get_admin_token()
+	print "true:getsubnets"
+	if request.GET.has_key('tenantid'):
+		print "true: tenantid"
+		tenantid = request.GET['tenantid'] #require the tenantid from js-ajax
+		headers = {"X-Auth-Token":token,"Content-Type": 'application/json'}
+		result = get_one_tenant_subnets( tenantid, headers)
+ 		return HttpResponse(json.dumps(result), content_type = "application/json")
+	else:
+		print "not get getsubnets request!"
 
- 
+@csrf_exempt
+def getinstances(request):
+	result = {}
+	print "getinstances!!!!!!"
+	token = get_admin_token()
+	if request.GET.has_key('subnetid'):
+		subnetid =  request.GET['subnetid']
+		headers = {"X-Auth-Token":token,"Content-Type": 'application/json'}
+		result = get_one_subnet_instances(subnetid ,headers)
+		return HttpResponse(json.dumps(result), content_type = "application/json")
+	else:
+		print "not get getinstances request!"
+
 def monitor(request):
     maxservice=Service.objects.all().values('HostName','ServiceName').order_by('HostName').annotate(max=Max('LastCheck'))
     service = []
