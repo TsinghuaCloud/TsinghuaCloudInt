@@ -24,7 +24,13 @@ def homepage(request):
     return render(request,'TsinghuaCloudMonitor/homepage.html')
 
 def mapchart(request):
-    return render(request,'TsinghuaCloudMonitor/mapchart.html')
+    flag = 1
+    return render(request,'TsinghuaCloudMonitor/mapchart.html',{'flag':flag})
+
+@csrf_exempt
+def request(request,tenantid):
+    flag =1
+    return render(request,'TsinghuaCloudMonitor/submap.html',{'flag':flag,'tenantid':tenantid})
     
 def start_system(request):
     return render(request,'TsinghuaCloudMonitor/start_system.html')

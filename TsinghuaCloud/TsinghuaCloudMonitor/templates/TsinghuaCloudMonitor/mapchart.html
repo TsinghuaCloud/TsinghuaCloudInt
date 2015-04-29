@@ -51,8 +51,10 @@ var csrftoken = getCookie('csrftoken');
             }
         }
     });
+
+
     // END DJANGO AJAX
-  
+
           
 });
 
@@ -87,143 +89,172 @@ var csrftoken = getCookie('csrftoken');
     </div>
 	
 	<div data-options="region:'center',title:'网络拓扑图'" style="background:#F0F0F0">
-	<div id="map" style="height:700px;width:1300px;"></div>
-<!-- ECharts单文件引入 -->
-<script src="{% static 'jquery-easyui-1/echarts.js'%}">></script>
-<script type="text/javascript">
-        // 路径配置
-        require.config({
-            paths: {
-                echarts: 'http://echarts.baidu.com/build/dist'
-            }
-        });
-// 使用
-        require(
-            [
-                'echarts',
-                'echarts/chart/force' // 使用柱状图就加载bar模块，按需加载
-               
-            ],
-            function (ec) {
-                // 基于准备好的dom，初始化echarts图表
-                var myChart = ec.init(document.getElementById('map')); 
-                var option = {
-    title : {
-        text: 'Host Map',
-       
-        x:'right',
-        y:'bottom'
-    },
-    tooltip : {
-        trigger: 'item',
-        formatter: '{a} : {b}'
-    },
-    toolbox: {
-        show : true,
-        feature : {
-            restore : {show: true},
-            magicType: {show: false},
-            saveAsImage : {show: true}
+	<div style="height: 650px;width:1300px;" id="canvas"/>
+<script type="text/javascript" src="{% static 'QuneeHTML5_V1.8/demos/lib/qunee-min.js'%}"></script>
+<!--<script type="text/javascript" src="../qunee.js?v=1.8"></script>-->
+<script type="text/javascript" src="{% static 'QuneeHTML5_V1.8/demos/js/common.js'%}"></script>
+<script type="text/javascript" src="{% static 'QuneeHTML5_V1.8/demos/js/graphs.js'%}"></script>
+<script type="text/javascript" src="{% static 'QuneeHTML5_V1.8/demos/js/demo.js'%}"></script>
+
+<link rel="stylesheet" href="{%static 'QuneeHTML5_V1.8/demos/js/codemirror/codemirror.css' %}">
+<script src="{% static 'QuneeHTML5_V1.8/demos/js/codemirror/codemirror.js'%}"></script>
+<script src="{% static 'QuneeHTML5_V1.8/demos/js/codemirror/javascript.js'%}"></script>
+<script>
+    
+var graph = new Q.Graph(canvas);
+graph.zoomToOverview();
+graph.styles = {};
+graph.styles[Q.Styles.LABEL_FONT_SIZE] = 13;
+
+function createNode(image, x, y, name, group){
+    var node = graph.createNode(name, x, y);
+    if(image){
+        if(Q.isString(image)){
+            image = "{% static 'QuneeHTML5_V1.8/demos/network/images2/'%}" + image;
         }
-    },
-    legend: {
-        x: 'left',
-        data:['Host']
-    },
-    series : [
-        {
-            type:'force',
-            name : "Host Map",
-            ribbonType: false,
-            categories : [
-                {
-                    name: 'Host'
-                },
-                            ],
-            itemStyle: {
-                normal: {
-                    label: {
-                        show: true,
-                        textStyle: {
-                            color: '#333'
-                        }
-                    },
-                    nodeStyle : {
-                        brushType : 'both',
-                        borderColor : 'rgba(255,215,0,0.4)',
-                        borderWidth : 1
-                    },
-                    linkStyle: {
-                        type: 'curve'
-                    }
-                },
-                emphasis: {
-                    label: {
-                        show: false
-                        // textStyle: null      // 默认使用全局文本样式，详见TEXTSTYLE
-                    },
-                    nodeStyle : {
-                        //r: 30
-                    },
-                    linkStyle : {}
-                }
-            },
-            useWorker: false,
-            minRadius : 30,
-            maxRadius : 55,
-            gravity: 1.1,
-            scaling: 1.1,
-            roam: 'move',
-            nodes:[
-                {category:0, name: 'Center', value : 15, label: 'Switch Center'},
-                {category:1, name: '220',value : 5},
-                {category:1, name: '221',value : 7},
-                {category:1, name: '222',value : 8},
-                {category:1, name: 'Localhost',value : 9},
-               
-            ],
-            links : [
-             
-                {source : '220', target : 'Center', weight : 2},
-                {source : '221', target : 'Center', weight : 6},
-                {source : '222', target : 'Center', weight : 5},
-                {source : '222', target : 'Localhost', weight : 5},
-                {source : 'Localhost', target : 'Center', weight : 7},
-                           ]
-        }
-    ]
-};
-var ecConfig = require('echarts/config');
-function focus(param) {
-    var data = param.data;
-    var links = option.series[0].links;
-    var nodes = option.series[0].nodes;
-    if (
-        data.source !== undefined
-        && data.target !== undefined
-    ) { //点击的是边
-        var sourceNode = nodes[data.source];
-        var targetNode = nodes[data.target];
-        console.log("选中了边 " + sourceNode.name + ' -> ' + targetNode.name + ' (' + data.weight + ')');
-    } else { // 点击的是点
-        console.log("选中了" + data.name + '(' + data.value + ')');
+        node.image = image;
+    }
+    if(group){
+        group.addChild(node);
+    }
+    return node;
+}
+
+function createText(name, x, y, fontSize, color, parent){
+    var text = graph.createText(name, x, y);
+    text.setStyle(Q.Styles.LABEL_ANCHOR_POSITION, Q.Position.CENTER_MIDDLE);
+    text.setStyle(Q.Styles.LABEL_POSITION, Q.Position.CENTER_MIDDLE);
+    text.setStyle(Q.Styles.LABEL_FONT_SIZE, fontSize);
+    text.setStyle(Q.Styles.LABEL_COLOR, color);
+    text.setStyle(Q.Styles.LABEL_BACKGROUND_COLOR, null);
+    if(parent){
+        parent.addChild(text);
+    }
+    return text;
+}
+
+function createGroup(padding){
+    var group = graph.createGroup();
+    group.groupImage = graphs.group_cloud;
+    group.padding = padding || 30;
+    return group;
+}
+
+function createEdge(a, b, color, dashed, name){
+    var edge = graph.createEdge(name, a, b);
+    if(dashed){
+        edge.setStyle(Q.Styles.EDGE_LINE_DASH, [8, 5]);
+    }
+    edge.setStyle(Q.Styles.EDGE_WIDTH, 3);
+    edge.setStyle(Q.Styles.EDGE_COLOR, color);
+    edge.setStyle(Q.Styles.ARROW_TO, false);
+    return edge;
+}
+
+var VPNFlexEdgeUI = function(edge, graph){
+    Q.doSuperConstructor(this, VPNFlexEdgeUI, arguments);
+}
+VPNFlexEdgeUI.prototype = {
+    drawEdge: function(path, fromUI, toUI, edgeType, fromBounds, toBounds){
+        var from = fromBounds.center;
+        path.curveTo(from.x, from.y, internet.x, internet.y);
     }
 }
-myChart.on(ecConfig.EVENT.CLICK, focus)
 
-myChart.on(ecConfig.EVENT.FORCE_LAYOUT_END, function () {
-    console.log(myChart.chart.force.getPosition());
+Q.extend(VPNFlexEdgeUI, Q.EdgeUI);
+
+createText("租户分布图\n中心网络拓扑图", 859, 100, 40, "#F00");
+var model = graph.graphModel;
+var group = createGroup(50);
+
+
+var internet = createNode(graphs.group_cloud, 500, 495, "Internet");
+internet.setStyle(Q.Styles.LABEL_ANCHOR_POSITION, Q.Position.CENTER_MIDDLE);
+internet.setStyle(Q.Styles.LABEL_POSITION, Q.Position.CENTER_MIDDLE);
+internet.setStyle(Q.Styles.LABEL_FONT_SIZE, 24);
+internet.setStyle(Q.Styles.LABEL_FONT_STYLE, "bold");
+internet.size = {width: 200};
+
+
+
+
+
+function createSubGroup(x, y, renderColor,name,id){
+    var group = createGroup();
+    group.name = name;
+    if(renderColor){
+        group.setStyle(Q.Styles.RENDER_COLOR, renderColor);
+    }
+    var a = createNode("router.png", 49 + x, 100 + y, "路由器", group);
+    var b = createNode("exchange.png", 191 + x, 100 + y, "交换机", group);
+    createNode("pc.png", 313 + x, 100 + y, id, group);
+    createEdge(a, b, "#45E");
+    return a;
+}
+
+function directSubmap(id){
+
+            
+            window.location.href= 'http://127.0.0.1:8000/request/'+id;
+
+   
+}
+
+tenants= function (){
+ $.ajax({
+               url:'http://127.0.0.1:8000/tenants/',
+               success: function(result){
+                        var len = result['projects'].length;
+                        console.info(result);
+                        //console.info(result['projects'][0].name);
+                        for (var k=0;k<len;k++){
+                           var n = createSubGroup(50+k*80, 50-k*80,"#FFFFFF",result['projects'][k].name,result['projects'][k].id); 
+                           createEdge(internet, n).edgeType = Q.Consts.EDGE_TYPE_ZIGZAG;
+                        }
+                }
+        });
+};
+
+var setSelectionStyle = function (element) {
+    if (!(element instanceof Q.Node)) {
+        return;
+    }
+    var selected = graph.isSelected(element);
+    if (selected) {
+        //directSubmap(element);
+        //console.info(element);
+        if(element.toString().length>20){
+           directSubmap(element.toString());
+           //alert('dddss');
+        }
+    } else {
+        element.setStyle(Q.Styles.RENDER_COLOR, null);
+        element.setStyle(Q.Styles.PADDING, 0);
+        element.setStyle(Q.Styles.BORDER, 0);
+    }
+}
+graph.selectionChangeDispatcher.addListener(function (evt) {
+    if (window.onselectionchange) {
+        window.onselectionchange(evt, graph);
+    }
+    var data = evt.data;
+    if (!data) {
+        return;
+    }
+    if (Q.isArray(data)) {
+        for (var i = 0, l = data.length; i < l; i++) {
+            setSelectionStyle(data[i]);
+        }
+    } else {
+        setSelectionStyle(data);
+    }
 });
-
-
-                                        
-                // 为echarts对象加载数据 
-                myChart.setOption(option); 
-            }
-        );
+if({{flag}}==1){
+   tenants();
+}
 
 </script>
-  
+ 
 	</div>
 </body>
 </html>

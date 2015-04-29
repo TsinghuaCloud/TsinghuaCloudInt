@@ -40,16 +40,17 @@ var csrftoken = getCookie('csrftoken');
 
 
 <div class="login">
-  <h1>TSINGHUA CLOUD. PLEASE LOG IN.</h1>
+  <div style='width:310px;height:200px'>  </div>
+  <h1>Log In </h1>
   
   <form action="" method="post">
   {% csrf_token %}
     <p><input type="text" name="account" value="" placeholder="Username"></p>
     <p><input type="password" name="password" value="" placeholder="Password"></p>
     <p class="remember_me">
-      <a href="/register" style="color:#BEBEBE">Create A New Account</a>
+      
     </p>
-    <p class="submit"><input type="submit"  name="commit" value="LOG IN"></p>
+    <p class="submit"><input type="submit"  name="commit" value="Sign In"></p>
   </form>
   {% if errors %}
         <ul>
