@@ -208,7 +208,7 @@ tenants= function (){
                         console.info(result);
                         //console.info(result['projects'][0].name);
                         for (var k=0;k<len;k++){
-                           var n = createSubGroup(50+k*80, 50-k*80,"#FFFFFF",result['projects'][k].name,result['projects'][k].id); 
+                           var n = createSubGroup(k*180,Math.abs(len/2-k)*100,"#FFFFFF",result['projects'][k].name,result['projects'][k].id); 
                            createEdge(internet, n).edgeType = Q.Consts.EDGE_TYPE_ZIGZAG;
                         }
                 }
