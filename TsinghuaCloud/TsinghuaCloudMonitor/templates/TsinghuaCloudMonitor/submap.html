@@ -142,7 +142,7 @@ var kk = 2;
 
 subnets= function (){
  $.ajax({
-               url:'http://127.0.0.1:8000/subnets/',
+               url:'http://166.111.143.241:8080/subnets/',
                data: { 
                       tenantid: '{{tenantid}}',
                      },
@@ -176,7 +176,7 @@ subnets= function (){
 var f=0;
 instances= function (id,bus_id){
  $.ajax({
-               url:'http://127.0.0.1:8000/instances/',
+               url:'http://166.111.143.241:8080/instances/',
                data: { 
                       subnetid: id,
                      },

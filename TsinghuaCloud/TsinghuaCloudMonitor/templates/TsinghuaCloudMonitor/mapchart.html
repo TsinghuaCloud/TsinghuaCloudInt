@@ -195,14 +195,14 @@ function createSubGroup(x, y, renderColor,name,id){
 function directSubmap(id){
 
             
-            window.location.href= 'http://127.0.0.1:8000/request/'+id;
+            window.location.href= 'http://166.111.143.241:8080/request/'+id;
 
    
 }
 
 tenants= function (){
  $.ajax({
-               url:'http://127.0.0.1:8000/tenants/',
+               url:'http://166.111.143.241:8080/tenants/',
                success: function(result){
                         var len = result['projects'].length;
                         console.info(result);
