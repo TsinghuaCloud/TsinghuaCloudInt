@@ -129,6 +129,7 @@ var csrftoken = getCookie('csrftoken');
 <title>Basic Panel - jQuery EasyUI Demo</title>
 <script src="{% static 'jquery-easyui-1/jquery.min.js'%}"></script>
 <script src="{% static 'jquery-easyui-1/jquery.easyui.min.js'%}"></script>
+<script src="{% static 'js/group.js'%}"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'cloudclient/monitor.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/icon.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/black/easyui.css' %}">
@@ -146,33 +147,44 @@ var csrftoken = getCookie('csrftoken');
         <a href="/mapchart" class="easyui-linkbutton" style="width:130px">网络拓扑</a>
         <a href="/totalcompare" class="easyui-linkbutton" style="width:130px">全局监控</a>
     </div>	
-	<div data-options="region:'east',split:true,collapsed:true,title:'East'" style="width:100px;padding:10px;">east region</div>
+	
 	
 	<div data-options="region:'center',title:'各主机情况'">
 	    
 		<table id='service-table' class="easyui-datagrid" toolbar="#tb"
-					data-options="border:false,singleSelect:true,fit:true,fitColumns:true,onLoadSuccess:function(data){ MergeCells('service-table','itemid');}">
+					data-options="border:false,singleSelect:true,fit:true,view:groupview,
+                groupField:'type',
+                groupFormatter:function(value,rows){
+                    return value + ' - ' + rows.length + ' Item(s)';
+                },fitColumns:true,onLoadSuccess:function(data){ MergeCells('service-table','itemid');}">
 				<thead>
 					<tr>
 						<th data-options="field:'itemid'" width="50" sortable="true">主机名</th>
+                        <th data-options="field:'type'" width="50">类型</th>
 						<th data-options="field:'listprice'" width="50">状态</th>
 						<th data-options="field:'unitcost'" width="80">上次监控时间</th>
 						<th data-options="field:'attr1'" width="180">状态信息</th>
-						<th data-options="field:'status'" width="200">持续时间</th>
+						<th data-options="field:'status'" width="150">持续时间</th>
 					</tr>
 				</thead>
 				<tbody>
+                       
                        {% for host in host %}
+                       
                        <tr>
                        <td class='detail'><a href="{% url 'hostdetailmore' host.id%}" style="color:white">{{host.HostName}}</a></td>
+                       <td>{{host.HostType}}</td>
                        <td>UP</td>
                        <td>{{host.LastCheck}}</td>
                        <td>{{host.PluginOutput}}</td>
                        <td>{{host.Duration}}</td>
                        </tr>
+                    
                        {% endfor %}
-
+                       
 	    </table>
+
+        
 	</div>
 </body>
 </html>

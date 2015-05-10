@@ -22,12 +22,23 @@ class HostStatus(models.Model):
     Duration = models.CharField(max_length=50)
     PerformanceData = models.CharField(max_length=100)
     LastCheck = models.CharField(max_length=50)
+    HostType = models.CharField(max_length=50)
+
 
 class Host(models.Model):
     IP = models.CharField(max_length=50)
     HostName = models.CharField(max_length=50)
     Owner = models.CharField(max_length=50)
     Info = models.CharField(max_length=50)
+    MonitorIP = models.CharField(max_length=50)
+    HostType = models.CharField(max_length=50)
+
+class Schedule(models.Model):
+    IP = models.CharField(max_length=50)
+    HostName = models.CharField(max_length=50)
+    Source = models.CharField(max_length=50)
+    Flag = models.CharField(max_length=50)
+    NagiosServer = models.CharField(max_length=50)
    
 
     

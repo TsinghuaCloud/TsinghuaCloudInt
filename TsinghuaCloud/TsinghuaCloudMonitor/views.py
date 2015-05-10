@@ -173,9 +173,11 @@ def hoststatus(request):
     host=[]
     maxhost=HostStatus.objects.all().values('HostName').annotate(max=Max('LastCheck'))
     for i in range(0,len(maxhost)):
+        hosttype = get_object_or_404(Host,HostName=maxhost[i].get('HostName'))
         temp = HostStatus.objects.filter(HostName=maxhost[i].get('HostName'),LastCheck=maxhost[i].get('max'))  
         for i in range(0,len(temp)):
-            
+            temp[i].HostType = hosttype.HostType
+            print temp[i].HostType
             host.append(temp[i])
        
     return render(request,'TsinghuaCloudMonitor/hoststatus.html',{'host':host})
@@ -543,7 +545,7 @@ def start_input(request):
         else:  
             hostname = request.POST.get('hostname')  
         print hostname
-        host=Host(IP=ip,HostName=hostname,Owner='nagios',Info='UP') 
+        host=Host(IP=ip,HostName=hostname,Owner='nagios',Info='UP',HostType='virtual') 
         host.save()  
         p = sub.Popen('/home/django/TsinghuaCloud/TsinghuaCloud/signal.py',stdout=sub.PIPE,shell=True)
         return  HttpResponseRedirect('/hoststatus')  
