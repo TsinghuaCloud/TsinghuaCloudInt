@@ -1,6 +1,6 @@
 #! /usr/bin/python
-#import pxssh  
-#import pexpect
+import pxssh  
+import pexpect
 import MySQLdb
 import MySQLdb.cursors
 import os
@@ -10,7 +10,7 @@ import time
 host1='166.111.143.250'
 port='22'
 username='root'
-passwd='tsinghuacloud'
+passwd='tsinghuanmcloud'
 cmd='/usr/local/nagios/etc/Configuration.py'
 
 class DBConn:
@@ -149,7 +149,7 @@ def test():
 			insertData(sql4)
 #			if sort2[0]['Server'] == '01':
 #				print 'sss'
-#				ssh_cmd(host1,port,username,passwd,cmd)
+			ssh_cmd(host1,port,username,passwd,cmd)
             
 		sql5 = "delete from TsinghuaCloudMonitor_schedule where IP = '%s'" % sort[j]['IP']
 		deleteData(sql5)
@@ -160,6 +160,6 @@ def test():
 
 while True:
 	test()
-#      time.sleep(5)
+        time.sleep(2)
  
    
