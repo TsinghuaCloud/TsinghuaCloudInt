@@ -8,6 +8,7 @@ from TsinghuaCloudMonitor.models import User
 from TsinghuaCloudMonitor.models import Service
 from TsinghuaCloudMonitor.models import HostStatus
 from TsinghuaCloudMonitor.models import Host
+from TsinghuaCloudMonitor.models import Schedule
 from django.template.defaulttags import csrf_token
 from django.db.models import Count, Max
 from django.template import RequestContext
@@ -544,10 +545,11 @@ def start_input(request):
             errors.append('Please Enter hostname')  
         else:  
             hostname = request.POST.get('hostname')  
-        print hostname
-        host=Host(IP=ip,HostName=hostname,Owner='nagios',Info='UP',HostType='virtual') 
-        host.save()  
-        p = sub.Popen('/home/django/TsinghuaCloud/TsinghuaCloud/signal.py',stdout=sub.PIPE,shell=True)
+        now =  time.time()
+        print now
+        schedule=Schedule(IP=ip,HostName=hostname,ArrivingTime=now) 
+        schedule.save()  
+        #p = sub.Popen('/home/django/TsinghuaCloud/TsinghuaCloud/schedule.py',stdout=sub.PIPE,shell=True)
         return  HttpResponseRedirect('/hoststatus')  
   
     return render_to_response('TsinghuaCloudMonitor/start_input.html',{'errors': errors}) 

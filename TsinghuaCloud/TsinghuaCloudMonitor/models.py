@@ -30,15 +30,20 @@ class Host(models.Model):
     HostName = models.CharField(max_length=50)
     Owner = models.CharField(max_length=50)
     Info = models.CharField(max_length=50)
-    MonitorIP = models.CharField(max_length=50)
+    NagiosServer = models.CharField(max_length=50)
     HostType = models.CharField(max_length=50)
 
 class Schedule(models.Model):
     IP = models.CharField(max_length=50)
     HostName = models.CharField(max_length=50)
-    Source = models.CharField(max_length=50)
-    Flag = models.CharField(max_length=50)
-    NagiosServer = models.CharField(max_length=50)
+    ArrivingTime = models.CharField(max_length=50)
+    
+
+class Nagios(models.Model):
+    Server = models.CharField(max_length=50)
+    Target_IP =models.CharField(max_length=50)
+    Target_HostName = models.CharField(max_length=50)
+    
    
 
     
