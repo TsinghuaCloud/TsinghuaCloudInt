@@ -15,6 +15,7 @@ class Service(models.Model):
     PluginOutput = models.CharField(max_length=100)
     PerformanceData = models.CharField(max_length=100)
     LastCheck = models.CharField(max_length=50)
+    HostType = models.CharField(max_length=50)
     
 class HostStatus(models.Model):
     HostName = models.CharField(max_length=50)
@@ -23,6 +24,7 @@ class HostStatus(models.Model):
     PerformanceData = models.CharField(max_length=100)
     LastCheck = models.CharField(max_length=50)
     HostType = models.CharField(max_length=50)
+    Status = models.CharField(max_length=50)
 
 
 class Host(models.Model):

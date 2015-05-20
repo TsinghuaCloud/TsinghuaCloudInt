@@ -1,3 +1,4 @@
+
 import base64,urllib,httplib,json,os
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.csrf import csrf_exempt
@@ -146,8 +147,10 @@ def monitor(request):
     maxservice=Service.objects.all().values('HostName','ServiceName').order_by('HostName').annotate(max=Max('LastCheck'))
     service = []
     for k in range(0,len(maxservice)):
+        hosttype = get_object_or_404(Host,HostName=maxservice[k].get('HostName'))        
         temp = Service.objects.filter(HostName=maxservice[k].get('HostName'),ServiceName= maxservice[k].get('ServiceName'),LastCheck=maxservice[k].get('max'))
-        for i in range(0,len(temp)):          
+        for i in range(0,len(temp)): 
+            temp[i].HostType = hosttype.HostType         
             service.append(temp[i])
             
     print service
@@ -167,7 +170,7 @@ def doSearch(request):
                service_1.append(temp[i])
     print service_1
     
-    return render_to_response('TsinghuaCloudMonitor/monitor.html',{'service':service_1})  
+    return render_to_rsponse('TsinghuaCloudMonitor/monitor.html',{'service':service_1})  
     
     
 def hoststatus(request):
@@ -178,10 +181,295 @@ def hoststatus(request):
         temp = HostStatus.objects.filter(HostName=maxhost[i].get('HostName'),LastCheck=maxhost[i].get('max'))  
         for i in range(0,len(temp)):
             temp[i].HostType = hosttype.HostType
+            status = temp[i].PluginOutput
+            print status[0:5]
+            if status[0:6]!= 'PINGOK':
+               temp[i].Status = 'DOWN'
+            else:
+               temp[i].Status = 'UP' 
             print temp[i].HostType
             host.append(temp[i])
        
     return render(request,'TsinghuaCloudMonitor/hoststatus.html',{'host':host})
+
+def memory_physical(request):
+    memoryuse_name=[]
+    memoryuse_total=[]
+    memoryuse_used=[]
+    memoryuse_object=[]
+    memoryuse=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck')).filter(ServiceName='MemoryUsage')
+    size = len(memoryuse)
+    print size
+    p = re.compile(r'\d+')
+    insize=0
+    for k in range(0,size):
+        temp_first=Service.objects.all().filter(HostName=memoryuse[k].get('HostName'),ServiceName='MemoryUsage',LastCheck=memoryuse[k].get('max'))
+
+        if len(temp_first)>1:
+            temp=temp_first[0]  
+        else:     
+            temp=get_object_or_404(Service,HostName=memoryuse[k].get('HostName'),ServiceName='MemoryUsage',LastCheck=memoryuse[k].get('max'))
+        hosttype = get_object_or_404(Host,HostName=temp.HostName)
+        temp.HostType = hosttype.HostType
+        
+        if temp.HostType == 'physical':
+            print temp.HostType
+            memoryuse_name.append(temp.HostName)  
+            if temp.PerformanceData == '':
+               memoryuse_used.append(0)
+               memoryuse_total.append(0)
+               
+            else:
+                 memoryuse_used.append(p.findall(temp.PerformanceData)[1])  
+                 memoryuse_total.append(p.findall(temp.PerformanceData)[0])
+                  
+            if memoryuse_total[insize] == 0:
+               temp = 0
+            else:
+               temp = format(float(memoryuse_used[insize])/float(memoryuse_total[insize]),'.2%')
+         
+            memoryuse_dic = {'name': memoryuse_name[insize],'used': memoryuse_used[insize],'total': memoryuse_total[insize],'percentage': temp}
+            memoryuse_object.append(memoryuse_dic)
+            insize=insize+1
+    print memoryuse_name
+    return HttpResponse(json.dumps(memoryuse_object), content_type = "application/json")
+
+def memory_virtual(request):
+    memoryuse_name=[]
+    memoryuse_total=[]
+    memoryuse_used=[]
+    memoryuse_object=[]
+    memoryuse=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck')).filter(ServiceName='MemoryUsage')
+    size = len(memoryuse)
+    print size
+    p = re.compile(r'\d+')
+    insize=0
+    for k in range(0,size):
+        temp_first=Service.objects.all().filter(HostName=memoryuse[k].get('HostName'),ServiceName='MemoryUsage',LastCheck=memoryuse[k].get('max'))
+
+        if len(temp_first)>1:
+            temp=temp_first[0]  
+        else:     
+            temp=get_object_or_404(Service,HostName=memoryuse[k].get('HostName'),ServiceName='MemoryUsage',LastCheck=memoryuse[k].get('max'))
+        hosttype = get_object_or_404(Host,HostName=temp.HostName)
+        temp.HostType = hosttype.HostType
+        
+        if temp.HostType == 'virtual':
+            print temp.HostType
+            memoryuse_name.append(temp.HostName)  
+            if temp.PerformanceData == '':
+               memoryuse_used.append(0)
+               memoryuse_total.append(0)
+               
+            else:
+                 memoryuse_used.append(p.findall(temp.PerformanceData)[1])  
+                 memoryuse_total.append(p.findall(temp.PerformanceData)[0])
+                  
+            if memoryuse_total[insize] == 0:
+               temp = 0
+            else:
+               temp = format(float(memoryuse_used[insize])/float(memoryuse_total[insize]),'.2%')
+         
+            memoryuse_dic = {'name': memoryuse_name[insize],'used': memoryuse_used[insize],'total': memoryuse_total[insize],'percentage': temp}
+            memoryuse_object.append(memoryuse_dic)
+            insize=insize+1
+    print memoryuse_name
+    return HttpResponse(json.dumps(memoryuse_object), content_type = "application/json")
+
+
+
+def memory_external(request):
+    memoryuse_name=[]
+    memoryuse_total=[]
+    memoryuse_used=[]
+    memoryuse_object=[]
+    memoryuse=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck')).filter(ServiceName='MemoryUsage')
+    size = len(memoryuse)
+    print size
+    p = re.compile(r'\d+')
+    nsize=0
+    for k in range(0,size):
+        temp_first=Service.objects.all().filter(HostName=memoryuse[k].get('HostName'),ServiceName='MemoryUsage',LastCheck=memoryuse[k].get('max'))
+
+        if len(temp_first)>1:
+            temp=temp_first[0]  
+        else:     
+            temp=get_object_or_404(Service,HostName=memoryuse[k].get('HostName'),ServiceName='MemoryUsage',LastCheck=memoryuse[k].get('max'))
+        hosttype = get_object_or_404(Host,HostName=temp.HostName)
+        temp.HostType = hosttype.HostType
+        
+        if temp.HostType == 'external':
+            print temp.HostType
+            memoryuse_name.append(temp.HostName)  
+            if temp.PerformanceData == '':
+               memoryuse_used.append(0)
+               memoryuse_total.append(0)
+               
+            else:
+                 memoryuse_used.append(p.findall(temp.PerformanceData)[1])  
+                 memoryuse_total.append(p.findall(temp.PerformanceData)[0])
+                  
+            if memoryuse_total[insize] == 0:
+               temp = 0
+            else:
+               temp = format(float(memoryuse_used[insize])/float(memoryuse_total[insize]),'.2%')
+         
+            memoryuse_dic = {'name': memoryuse_name[insize],'used': memoryuse_used[insize],'total': memoryuse_total[insize],'percentage': temp}
+            memoryuse_object.append(memoryuse_dic)
+            insize=insize+1
+    print memoryuse_name
+    return HttpResponse(json.dumps(memoryuse_object), content_type = "application/json")
+
+def cpu_physical(request):
+    cpuloaduse_name=[]
+    cpuloaduse_used=[]
+    cpuloaduse_object=[]
+    cpuloaduse=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck')).filter(ServiceName='cpuload')
+    print cpuloaduse
+    size = len(cpuloaduse)
+    p = re.compile(r'(\d+)\.(\d*)')
+    insize = 0
+    for k in range(0,size):
+        temp=get_object_or_404(Service,HostName=cpuloaduse[k].get('HostName'),ServiceName='cpuload',LastCheck=cpuloaduse[k].get('max'))
+        hosttype = get_object_or_404(Host,HostName=temp.HostName)
+        temp.HostType = hosttype.HostType
+        
+        if temp.HostType == 'physical':
+            cpuloaduse_name.append(temp.HostName)  
+            if temp.PerformanceData == '':
+               cpuloaduse_used.append(0)
+            else:
+               cpuloaduse_used.append('.'.join(p.findall(temp.PerformanceData)[3]))
+
+            tem = format(float(cpuloaduse_used[insize]),'.2%')
+            cpuloaduse_dic = {'name': cpuloaduse_name[insize],'used': cpuloaduse_used[insize],'percentage':tem}
+            cpuloaduse_object.append(cpuloaduse_dic)
+            insize = insize+1
+    return HttpResponse(json.dumps(cpuloaduse_object), content_type = "application/json")        
+
+def cpu_virtual(request):
+    cpuloaduse_name=[]
+    cpuloaduse_used=[]
+    cpuloaduse_object=[]
+    cpuloaduse=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck')).filter(ServiceName='cpuload')
+    print cpuloaduse
+    size = len(cpuloaduse)
+    p = re.compile(r'(\d+)\.(\d*)')
+    insize = 0
+    for k in range(0,size):
+        temp=get_object_or_404(Service,HostName=cpuloaduse[k].get('HostName'),ServiceName='cpuload',LastCheck=cpuloaduse[k].get('max'))
+        hosttype = get_object_or_404(Host,HostName=temp.HostName)
+        temp.HostType = hosttype.HostType
+        
+        if temp.HostType == 'virtual':
+            cpuloaduse_name.append(temp.HostName)  
+            if temp.PerformanceData == '':
+               cpuloaduse_used.append(0)
+            else:
+               cpuloaduse_used.append('.'.join(p.findall(temp.PerformanceData)[3]))
+
+            tem = format(float(cpuloaduse_used[insize]),'.2%')
+            cpuloaduse_dic = {'name': cpuloaduse_name[insize],'used': cpuloaduse_used[insize],'percentage':tem}
+            cpuloaduse_object.append(cpuloaduse_dic)
+            insize = insize+1
+    return HttpResponse(json.dumps(cpuloaduse_object), content_type = "application/json")  
+
+def cpu_external(request):
+    cpuloaduse_name=[]
+    cpuloaduse_used=[]
+    cpuloaduse_object=[]
+    cpuloaduse=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck')).filter(ServiceName='cpuload')
+    print cpuloaduse
+    size = len(cpuloaduse)
+    p = re.compile(r'(\d+)\.(\d*)')
+    insize = 0
+    for k in range(0,size):
+        temp=get_object_or_404(Service,HostName=cpuloaduse[k].get('HostName'),ServiceName='cpuload',LastCheck=cpuloaduse[k].get('max'))
+        hosttype = get_object_or_404(Host,HostName=temp.HostName)
+        temp.HostType = hosttype.HostType
+        
+        if temp.HostType == 'external':
+            cpuloaduse_name.append(temp.HostName)  
+            if temp.PerformanceData == '':
+               cpuloaduse_used.append(0)
+            else:
+               cpuloaduse_used.append('.'.join(p.findall(temp.PerformanceData)[3]))
+
+            tem = format(float(cpuloaduse_used[insize]),'.2%')
+            cpuloaduse_dic = {'name': cpuloaduse_name[insize],'used': cpuloaduse_used[insize],'percentage':tem}
+            cpuloaduse_object.append(cpuloaduse_dic)
+            insize = insize+1
+    return HttpResponse(json.dumps(cpuloaduse_object), content_type = "application/json")  
+
+def pro_physical(request):
+    pro_name=[]
+    pro_used=[]
+    processusage_object=[]
+    prousage=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck')).filter(ServiceName='total-procs')
+    size = len(prousage)
+    p = re.compile(r'\d+')
+    insize =0 
+    for k in range(0,size):
+        temp=get_object_or_404(Service,HostName=prousage[k].get('HostName'),ServiceName='total-procs',LastCheck=prousage[k].get('max'))
+        hosttype = get_object_or_404(Host,HostName=temp.HostName)
+        temp.HostType = hosttype.HostType
+        if temp.HostType == 'physical':       
+            pro_name.append(temp.HostName)  
+            if temp.PerformanceData == '':
+               pro_used.append(0)
+            else:
+               pro_used.append(p.findall(temp.PerformanceData)[0])  
+            processusage_dic = {'name': pro_name[insize],'used': pro_used[insize]}
+            processusage_object.append(processusage_dic) 
+            insize = insize +1 
+    return HttpResponse(json.dumps(processusage_object), content_type = "application/json")  
+
+def pro_virtual(request):
+    pro_name=[]
+    pro_used=[]
+    processusage_object=[]
+    prousage=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck')).filter(ServiceName='total-procs')
+    size = len(prousage)
+    p = re.compile(r'\d+')
+    insize =0 
+    for k in range(0,size):
+        temp=get_object_or_404(Service,HostName=prousage[k].get('HostName'),ServiceName='total-procs',LastCheck=prousage[k].get('max'))
+        hosttype = get_object_or_404(Host,HostName=temp.HostName)
+        temp.HostType = hosttype.HostType
+        if temp.HostType == 'virtual':       
+            pro_name.append(temp.HostName)  
+            if temp.PerformanceData == '':
+               pro_used.append(0)
+            else:
+               pro_used.append(p.findall(temp.PerformanceData)[0])  
+            processusage_dic = {'name': pro_name[insize],'used': pro_used[insize]}
+            processusage_object.append(processusage_dic) 
+            insize = insize +1 
+    return HttpResponse(json.dumps(processusage_object), content_type = "application/json")  
+    
+def pro_external(request):
+    pro_name=[]
+    pro_used=[]
+    processusage_object=[]
+    prousage=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck')).filter(ServiceName='total-procs')
+    size = len(prousage)
+    p = re.compile(r'\d+')
+    insize =0 
+    for k in range(0,size):
+        temp=get_object_or_404(Service,HostName=prousage[k].get('HostName'),ServiceName='total-procs',LastCheck=prousage[k].get('max'))
+        hosttype = get_object_or_404(Host,HostName=temp.HostName)
+        temp.HostType = hosttype.HostType
+        if temp.HostType == 'external':       
+            pro_name.append(temp.HostName)  
+            if temp.PerformanceData == '':
+               pro_used.append(0)
+            else:
+               pro_used.append(p.findall(temp.PerformanceData)[0])  
+            processusage_dic = {'name': pro_name[insize],'used': pro_used[insize]}
+            processusage_object.append(processusage_dic) 
+            insize = insize +1 
+    return HttpResponse(json.dumps(processusage_object), content_type = "application/json")  
+    
 
 def totalcompare(request):
     memoryuse_name=[]

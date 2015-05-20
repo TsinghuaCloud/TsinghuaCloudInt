@@ -136,6 +136,7 @@ var csrftoken = getCookie('csrftoken');
 <title>Tsinghua Cloud - Monitor Page</title>
 <script src="{% static 'jquery-easyui-1/jquery.min.js'%}"></script>
 <script src="{% static 'jquery-easyui-1/jquery.easyui.min.js'%}"></script>
+<script src="{% static 'js/group.js'%}"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'cloudclient/monitor.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/icon.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'jquery-easyui-1/themes/black/easyui.css' %}">
@@ -160,16 +161,21 @@ var csrftoken = getCookie('csrftoken');
 	<div data-options="region:'center',title:'监控信息'">
 	    
 		<table id='service-table' class="easyui-datagrid" toolbar="#tb"
-					data-options="border:false,singleSelect:true,fit:true,fitColumns:true,onLoadSuccess:function(data){ MergeCells('service-table','itemid');}">
+					data-options="border:false,singleSelect:true,fit:true,view:groupview,
+                groupField:'type',
+                groupFormatter:function(value,rows){
+                    return value + ' - ' + rows.length + ' Item(s)';
+                },fitColumns:true,onLoadSuccess:function(data){ MergeCells('service-table','itemid');}">
 				<thead>
 					<tr>
 						<th data-options="field:'itemid'" width="50" sortable="true">主机</th>
 						<th data-options="field:'productid'" width="70">服务</th>
-						<th data-options="field:'listprice'" width="30">状态</th>
+						<!-- <th data-options="field:'listprice'" width="30">状态</th> -->
 						<th data-options="field:'unitcost'" width="80">上次查看</th>
 						<th data-options="field:'duration'" width="70">持续时间</th>
 						<th data-options="field:'attr1'" width="180">状态信息</th>
 						<th data-options="field:'status'" width="220">详细运行数据</th>
+                        <th data-options="field:'type'" width="50">主机类型</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -177,11 +183,12 @@ var csrftoken = getCookie('csrftoken');
                         <tr>
                         <td class='detail'><a href="{% url 'hostdetail' service.id%}">{{service.HostName}}</a></td>
                         <td>{{service.ServiceName}}</td>
-                        <td><span style="color:#3CB371;">OK</span></td>
+                        <!-- <td>{{service.Status}}</td> -->
                         <td>{{service.LastCheck}}</td>
                         <td>{{service.Duration}}</td>
                         <td>{{service.PluginOutput}}</td>
                         <td>{{service.PerformanceData}}</td>
+                        <td>{{service.HostType}}</td>
                         </tr>
                         {% endfor %}
 

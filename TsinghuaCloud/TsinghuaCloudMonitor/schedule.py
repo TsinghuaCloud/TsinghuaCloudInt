@@ -147,9 +147,15 @@ def test():
 			insertData(sql3)
 			sql4="insert into TsinghuaCloudMonitor_host(IP,HostName,Owner,Info,NagiosServer,HostType)value('%s','%s','nagios','UP','%s','virtual')" % (ipgroup[k],namegroup[k],sort2[0]['Server'])
 			insertData(sql4)
-#			if sort2[0]['Server'] == '01':
-#				print 'sss'
-			ssh_cmd(host1,port,username,passwd,cmd)
+<<<<<<< HEAD
+			#if sort2[0]['Server'] == '01':
+				#print 'sss'
+				#ssh_cmd(host1,port,username,passwd,cmd)
+=======
+			#if sort2[0]['Server'] == '01':
+				#print 'sss'
+				#ssh_cmd(host1,port,username,passwd,cmd)
+>>>>>>> lin
             
 		sql5 = "delete from TsinghuaCloudMonitor_schedule where IP = '%s'" % sort[j]['IP']
 		deleteData(sql5)

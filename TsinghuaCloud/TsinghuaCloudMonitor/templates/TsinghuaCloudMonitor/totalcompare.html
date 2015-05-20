@@ -36,6 +36,9 @@ function cache_clear()
 }
 
 
+
+
+
         
 $(function () {
 var csrftoken = getCookie('csrftoken'); 
@@ -52,8 +55,7 @@ var csrftoken = getCookie('csrftoken');
         }
     });
     // END DJANGO AJAX
-  
-          
+
 });
 
 
@@ -112,6 +114,9 @@ table.gridtable td {
         <a href="/totalcompare" class="easyui-linkbutton" style="width:130px">全局监控</a>
     </div>
 	<div data-options="region:'center',title:'全局监控图'" style="background:#F0F0F0;position:relative;">
+        <a id="physical"  class="easyui-linkbutton" style="width:130px">物理机</a>
+        <a id="virtual"  class="easyui-linkbutton" style="width:130px">虚拟机</a>
+        <a id="external"  class="easyui-linkbutton" style="width:130px">外部监控</a>
         
         <div style="position:relative;height:600px;width:1300px">
         	<div id="memoryusage" style="height:600px;width:1000px;position:absolute;top:0;left:0; border:2px solid;border-color:#666666; "></div>
@@ -138,12 +143,207 @@ table.gridtable td {
                             </tr>
                             {% endfor %}
                     </tbody>
-                </table>
+                </table> 
             </div>
         </div>
                 <!-- ECharts单文件引入 -->
+//         <script>
+//         memory_physical_form = function() {
+//     $('#memoryusage_form').datagrid({
+//         url : 'http://127.0.0.1:8000/memory_physical/',
+
+//         columns : [ [ {
+//             field : 'name',
+//             width : '30px',
+//             align : 'center',
+//             title : '主机'
+//         }, {
+//             field : 'used',
+//             width : '100px',
+//             align : 'center',
+//             title : '已用用量KB'
+//         }, {
+//             field : 'total',
+//             width : '100px',
+//             align : 'center',
+//             title : '总量KB'
+//         }, {
+//             field : 'percentage',
+//             width : '50px',
+//             align : 'center',
+//             title : '使用率'
+//         }] ]
+//     });
+//     //Newstar.rqRequirmentList.doApproveSearch();
+// };
+//         $('#memoryusage_form').datagrid('load','');
+//         </script>
+
         <script src="{% static 'jquery-easyui-1/echarts.js'%}"></script>
         <script type="text/javascript">
+        $(function () {
+        action();
+        cpu();
+        pro();
+
+        });
+        setInterval("action()", 3000); 
+        var choice = 0;
+        $("#virtual").click(function(){ 
+         choice = 1;
+         action();
+         cpu();
+         pro();
+        });
+        $("#external").click(function(){ 
+         choice = 2;
+         action();
+         cpu();
+         pro();
+        });
+        $("#physical").click(function(){ 
+         choice = 0;
+         action();
+         cpu();
+         pro();
+        });
+
+action=function(){
+    if(choice == 0){
+    $.ajax({
+               url:'http://166.111.143.241:8080/memory_physical/',
+               success: function(result){
+                        if (result.length!=0){
+                        var memory_used_all =0;
+                        var memory_total_all = 0; 
+                        var memoryuse_name = new Array();
+                        console.info(result);
+                        console.info(result[0].name)
+                        for (var i=0;i<result.length;i++){
+                            memoryuse_name.push(result[i].name)
+                        }
+                        memoryuse_name.push('Overall');
+                        
+
+                        var memoryuse_used=new Array();
+                        console.info(result);
+                        //console.info(result[0].used)
+                        for (var i=0;i<result.length;i++){
+                            memoryuse_used.push(result[i].used);
+                            memory_used_all = parseFloat(memory_used_all) + parseFloat(result[i].used);
+                        }
+                        console.info(memory_used_all);
+                        memoryuse_used.push(memory_used_all.toString());
+
+                        var memoryuse_total = new Array();
+                        for (var i=0;i<result.length;i++){
+                            memoryuse_total.push(result[i].total);
+                            memory_total_all = parseFloat(memory_total_all) + parseFloat(result[i].total);
+                        }
+                        memoryuse_total.push(memory_total_all.toString());                        
+
+                        setMemory(memoryuse_name,memoryuse_used,memoryuse_total);
+                       }
+                        
+                       
+                    else{
+                        setMemory(' ', ' ',' '); 
+                    }
+                }
+        });
+    };
+    if (choice == 1){
+    $.ajax({
+               url:'http://166.111.143.241:8080/memory_virtual/',
+               success: function(result){
+                        if (result.length!=0){
+                        var memory_used_all =0;
+                        var memory_total_all = 0; 
+                        var memoryuse_name = new Array();
+                        console.info(result);
+                        console.info(result[0].name)
+                        for (var i=0;i<result.length;i++){
+                            memoryuse_name.push(result[i].name)
+                        }
+                        memoryuse_name.push('Overall');
+                        
+
+                        var memoryuse_used=new Array();
+                        console.info(result);
+                        //console.info(result[0].used)
+                        for (var i=0;i<result.length;i++){
+                            memoryuse_used.push(result[i].used);
+                            memory_used_all = parseFloat(memory_used_all) + parseFloat(result[i].used);
+                        }
+                        console.info(memory_used_all);
+                        memoryuse_used.push(memory_used_all.toString());
+
+                        var memoryuse_total = new Array();
+                        for (var i=0;i<result.length;i++){
+                            memoryuse_total.push(result[i].total);
+                            memory_total_all = parseFloat(memory_total_all) + parseFloat(result[i].total);
+                        }
+                        memoryuse_total.push(memory_total_all.toString());                        
+
+                        setMemory(memoryuse_name,memoryuse_used,memoryuse_total);
+                     }  
+                        
+                
+                        else{
+                        setMemory(' ', ' ',' '); 
+                    }
+                }
+        });    
+    };
+     if (choice == 2){
+    $.ajax({
+               url:'http://166.111.143.241:8080/memory_external/',
+               success: function(result){
+                        console.info(result);
+                        if (result.length!=0){
+                        var memory_used_all =0;
+                        var memory_total_all = 0; 
+                        var memoryuse_name = new Array();
+                        console.info(result);
+                        console.info(result[0].name)
+                        for (var i=0;i<result.length;i++){
+                            memoryuse_name.push(result[i].name)
+                        }
+                        memoryuse_name.push('Overall');
+                        
+
+                        var memoryuse_used=new Array();
+                        console.info(result);
+                        //console.info(result[0].used)
+                        for (var i=0;i<result.length;i++){
+                            memoryuse_used.push(result[i].used);
+                            memory_used_all = parseFloat(memory_used_all) + parseFloat(result[i].used);
+                        }
+                        console.info(memory_used_all);
+                        memoryuse_used.push(memory_used_all.toString());
+
+                        var memoryuse_total = new Array();
+                        for (var i=0;i<result.length;i++){
+                            memoryuse_total.push(result[i].total);
+                            memory_total_all = parseFloat(memory_total_all) + parseFloat(result[i].total);
+                        }
+                        memoryuse_total.push(memory_total_all.toString());                        
+
+                        setMemory(memoryuse_name,memoryuse_used,memoryuse_total);
+                       }
+                        
+                
+                     else{
+                        setMemory(' ', ' ',' '); 
+                    }
+                }
+        });    
+    };   
+};
+
+
+setMemory=function(memoryuse_name,memoryuse_used,memoryuse_total){
+
                 // 路径配置
                 require.config({
                     paths: {
@@ -157,32 +357,12 @@ table.gridtable td {
                         'echarts/chart/bar' // 使用柱状图就加载bar模块，按需加载
                        
                     ],
+
+                   
                     function (ec) {
+                    
                         // 基于准备好的dom，初始化echarts图表
-                        var memory_used_all =0;
-                        var memory_total_all = 0; 
-                        var memoryuse_name = new Array();
                         
-                        {% for name in memoryuse_name %}
-                          memoryuse_name.push('{{name}}');
-                        {% endfor %}
-                        memoryuse_name.push('Overall');
-
-                        var memoryuse_used = new Array();
-                        {% for used in memoryuse_used %}
-                          memoryuse_used.push({{used}});
-                          memory_used_all = memory_used_all + {{used}};
-                        {% endfor %}
-                        memoryuse_used.push(memory_used_all);
-                        //alert(memory_used_all);
-
-                        var memoryuse_total = new Array();
-                        {% for total in memoryuse_total %}
-                          memoryuse_total.push({{total}});
-                          memory_total_all = memory_total_all + {{total}};
-                        {% endfor %}
-                        //alert(memory_total_all);
-                        memoryuse_total.push(memory_total_all);
 
                         var number = memoryuse_total.length;
                         //alert(number);
@@ -201,89 +381,90 @@ table.gridtable td {
                         }
                         var myChart = ec.init(document.getElementById('memoryusage')); 
                         var option = {
-            title : {
-                text: '各主机内存使用情况',
-                subtext: 'by 清华云平台'
-            },
-            tooltip : {
-                trigger: 'axis'
-            },
-            legend: {
-                data:[
-                    '内存使用情况－已用','',
-                    '内存使用情况－总量'        ]
-            },
-            toolbox: {
-                show : true,
-                feature : {
-                    mark : {show: true},
-                    dataView : {show: true, readOnly: false},
-                    magicType : {show: true, type: ['line', 'bar']},
-                    restore : {show: true},
-                    saveAsImage : {show: true}
-                }
-            },
-            calculable : true,
-            grid: {y: 70, y2:30, x2:20},
-            xAxis : [
-                {
-                    type : 'category',
-                    data : memoryuse_name
-                },
-                {
-                    type : 'category',
-                    axisLine: {show:false},
-                    axisTick: {show:false},
-                    axisLabel: {show:false},
-                    splitArea: {show:false},
-                    splitLine: {show:false},
-                    data : memoryuse_name
-                }
-            ],
-            yAxis : [
-                {
-                    type : 'value',
-                    axisLabel:{formatter:'{value} KB'}
-                }
-            ],
-            series : [
-              
-                {
-                    name:'内存使用情况－已用',
-                    type:'bar',
-                    itemStyle: {normal: {color:'rgba(102,102,255,1)', label:{show:true,textStyle:{color:'#27727B'}}}},
-                    data:memoryuse_used
-                },
-           
+                                title : {
+                                    text: '各主机内存使用情况',
+                                    subtext: 'by 清华云平台'
+                                },
+                                tooltip : {
+                                    trigger: 'axis'
+                                },
+                                legend: {
+                                    data:[
+                                        '内存使用情况－已用','',
+                                        '内存使用情况－总量'        ]
+                                },
+                                toolbox: {
+                                    show : true,
+                                    feature : {
+                                        mark : {show: true},
+                                        dataView : {show: true, readOnly: false},
+                                        magicType : {show: true, type: ['line', 'bar']},
+                                        restore : {show: true},
+                                        saveAsImage : {show: true}
+                                    }
+                                },
+                                calculable : true,
+                                grid: {y: 70, y2:30, x2:20},
+                                xAxis : [
+                                    {
+                                        type : 'category',
+                                        data : memoryuse_name
+                                    },
+                                    {
+                                        type : 'category',
+                                        axisLine: {show:false},
+                                        axisTick: {show:false},
+                                        axisLabel: {show:false},
+                                        splitArea: {show:false},
+                                        splitLine: {show:false},
+                                        data : memoryuse_name
+                                    }
+                                ],
+                                yAxis : [
+                                    {
+                                        type : 'value',
+                                        axisLabel:{formatter:'{value} KB'}
+                                    }
+                                ],
+                                series : [
+                                  
+                                    {
+                                        name:'内存使用情况－已用',
+                                        type:'bar',
+                                        itemStyle: {normal: {color:'rgba(102,102,255,1)', label:{show:true,textStyle:{color:'#27727B'}}}},
+                                        data:memoryuse_used
+                                    },
+                               
 
-                {
-                    name:'内存使用情况－总量',
-                    type:'bar',
-                    xAxisIndex:1,
-                    itemStyle: {normal: {color:'rgba(102,102,255,0.6)', label:{show:true}}},
-                    data:memoryuse_total,
+                                    {
+                                        name:'内存使用情况－总量',
+                                        type:'bar',
+                                        xAxisIndex:1,
+                                        itemStyle: {normal: {color:'rgba(102,102,255,0.6)', label:{show:true}}},
+                                        data:memoryuse_total,
 
-                    markPoint : {
-                        data : mark,
-                        itemStyle: {normal: {color:'rgba(102,102,255,0.8)', label:{show:true},borderWidth:10}
-                        
+                                        markPoint : {
+                                            data : mark,
+                                            itemStyle: {normal: {color:'rgba(102,102,255,0.8)', label:{show:true},borderWidth:10}
+                                            
 
 
-                       }
-                            
-                    },
-                },
+                                           }
+                                                
+                                        },
+                                    },
                 
-            ]
+                                ]
 
 
-        };
+                            };
            
-                        // 为echarts对象加载数据 
-                        myChart.setOption(option); 
-                    }
-                );
-
+                           // 为echarts对象加载数据 
+                           console.info(option);
+                           myChart.setOption(option); 
+                        }
+                   );
+};
         </script>
     <br/>
     <br/>
@@ -315,6 +496,146 @@ table.gridtable td {
                 <!-- ECharts单文件引入 -->
         <script src="{% static 'jquery-easyui-1/echarts.js'%}"></script>
         <script type="text/javascript">
+   
+         setInterval("cpu()", 3000); 
+
+
+cpu=function(){
+    if(choice == 0){
+    $.ajax({
+               url:'http://166.111.143.241:8080/cpu_physical/',
+               success: function(result){
+                        if (result.length!=0){
+ 
+                        var cpuuse_name = new Array();
+
+                        for (var i=0;i<result.length;i++){
+                            cpuuse_name.push(result[i].name)
+                        }
+
+                        
+
+                        var cpuuse_used=new Array();
+                        console.info(result);
+                        //console.info(result[0].used)
+                        for (var i=0;i<result.length;i++){
+                            cpuuse_used.push(result[i].used);
+                            
+                        }
+
+
+                        var cpuuse_percentage = new Array();
+                        for (var i=0;i<result.length;i++){
+                            cpuuse_percentage.push(result[i].percentage);
+                           
+                        }
+                        
+                        var cpuuse_total = new Array();
+                        for (var i=0;i<result.length;i++){
+                            cpuuse_total.push(0.999999);
+                           
+                        }                       
+                        setCpu(cpuuse_name,cpuuse_used,cpuuse_percentage,cpuuse_total);
+                       }
+                        
+                       
+                    else{
+                        setCpu(' ', ' ',' '); 
+                    }
+                }
+        });
+    };
+    if (choice== 1){
+     $.ajax({
+               url:'http://166.111.143.241:8080/cpu_virtual/',
+               success: function(result){
+                        if (result.length!=0){
+ 
+                        var cpuuse_name = new Array();
+
+                        for (var i=0;i<result.length;i++){
+                            cpuuse_name.push(result[i].name)
+                        }
+
+                        
+
+                        var cpuuse_used=new Array();
+                        console.info(result);
+                        //console.info(result[0].used)
+                        for (var i=0;i<result.length;i++){
+                            cpuuse_used.push(result[i].used);
+                            
+                        }
+
+
+                        var cpuuse_percentage = new Array();
+                        for (var i=0;i<result.length;i++){
+                            cpuuse_percentage.push(result[i].percentage);
+                           
+                        }
+                        
+                        var cpuuse_total = new Array();
+                        for (var i=0;i<result.length;i++){
+                            cpuuse_total.push(0.999999);
+                           
+                        }                       
+                        setCpu(cpuuse_name,cpuuse_used,cpuuse_percentage,cpuuse_total);
+                       }
+                        
+                       
+                    else{
+                        setCpu(' ', ' ',' '); 
+                    }
+                }
+        });  
+    };
+     if (choice == 2){
+     $.ajax({
+               url:'http://166.111.143.241:8080/cpu_external/',
+               success: function(result){
+                        if (result.length!=0){
+ 
+                        var cpuuse_name = new Array();
+
+                        for (var i=0;i<result.length;i++){
+                            cpuuse_name.push(result[i].name)
+                        }
+
+                        
+
+                        var cpuuse_used=new Array();
+                        console.info(result);
+                        //console.info(result[0].used)
+                        for (var i=0;i<result.length;i++){
+                            cpuuse_used.push(result[i].used);
+                            
+                        }
+
+
+                        var cpuuse_percentage = new Array();
+                        for (var i=0;i<result.length;i++){
+                            cpuuse_percentage.push(result[i].percentage);
+                           
+                        }
+                        
+                        var cpuuse_total = new Array();
+                        for (var i=0;i<result.length;i++){
+                            cpuuse_total.push(0.999999);
+                           
+                        }                       
+                        setCpu(cpuuse_name,cpuuse_used,cpuuse_percentage,cpuuse_total);
+                       }
+                        
+                       
+                    else{
+                        setCpu(' ', ' ',' '); 
+                    }
+                }
+        });    
+    };   
+};
+
+setCpu=function(cpuuse_name,cpuuse_used,cpuuse_percentage,cpuuse_total){
                 // 路径配置
                 require.config({
                     paths: {
@@ -330,20 +651,7 @@ table.gridtable td {
                     ],
                     function (ec) {
                         // 基于准备好的dom，初始化echarts图表 
-                        var cpu_name = new Array(); 
-                        var cpu_total = new Array();                      
-                        {% for name in cpuloaduse_name %}
-                          cpu_name.push('{{name}}');
-                          cpu_total.push(0.99999);
-                        {% endfor %}
-                        
 
-                        var cpu_used = new Array();
-                        {% for used in cpuloaduse_used %}
-                          cpu_used.push({{used}});
-                        {% endfor %}
-                       
-                        
                         var myChart = ec.init(document.getElementById('cpuusage')); 
                         var option = {
                             title : {
@@ -373,7 +681,7 @@ table.gridtable td {
                             xAxis : [
                                 {
                                     type : 'category',
-                                    data : cpu_name
+                                    data : cpuuse_name
                                 },
                                 {
                                     type : 'category',
@@ -382,7 +690,7 @@ table.gridtable td {
                                     axisLabel: {show:false},
                                     splitArea: {show:false},
                                     splitLine: {show:false},
-                                    data : cpu_name
+                                    data : cpuuse_name
                                 }
                             ],
                             yAxis : [
@@ -397,7 +705,7 @@ table.gridtable td {
                                     name:'CPU使用情况－利用率',
                                     type:'bar',
                                     itemStyle: {normal: {color:'rgba(255,255,0,1)', label:{show:true,textStyle:{color:'#27727B'}}, formatter:'{c} %'}},
-                                    data:cpu_used
+                                    data:cpuuse_used
                                 },
                            
 
@@ -406,7 +714,7 @@ table.gridtable td {
                                     type:'bar',
                                     xAxisIndex:1,
                                     itemStyle: {normal: {color:'rgba(255,255,0,0.2)'}},
-                                    data:cpu_total
+                                    data:cpuuse_total
                                        
                                     
                                 },
@@ -420,6 +728,7 @@ table.gridtable td {
                         myChart.setOption(option); 
                     }
                 );
+    }
 
         </script>        
     <br/>
@@ -632,7 +941,118 @@ table.gridtable td {
         <!-- ECharts单文件引入 -->
         <script src="{% static 'jquery-easyui-1/echarts.js'%}"></script>
         <script type="text/javascript">
-                // 路径配置
+         setInterval("pro()", 3000); 
+
+
+pro=function(){
+    if(choice == 0){
+    $.ajax({
+               url:'http://166.111.143.241:8080/pro_physical/',
+               success: function(result){
+                        if (result.length!=0){
+ 
+                        var prouse_name = new Array();
+
+                        for (var i=0;i<result.length;i++){
+                            prouse_name.push(result[i].name)
+                        }
+                        prouse_name.push('overall');
+                        
+                        var prouse_total = 0;
+                        var prouse_used=new Array();
+                        console.info(result);
+                        //console.info(result[0].used)
+                        for (var i=0;i<result.length;i++){
+                            prouse_used.push(result[i].used);
+                            prouse_total = parseFloat(prouse_total) + parseFloat(result[i].used);
+                            
+                        }
+                        prouse_used.push(prouse_total.toString());
+
+                       
+                        setPro(prouse_name,prouse_used,prouse_total);
+                       }
+                        
+                       
+                    else{
+                        setPro(' ', ' ',' '); 
+                    }
+                }
+        });
+    };
+    if (choice== 1){
+     $.ajax({
+               url:'http://166.111.143.241:8080/pro_virtual/',
+               success: function(result){
+                        if (result.length!=0){
+ 
+                        var prouse_name = new Array();
+
+                        for (var i=0;i<result.length;i++){
+                            prouse_name.push(result[i].name)
+                        }
+                        prouse_name.push('overall');
+                        
+                        var prouse_total = 0;
+                        var prouse_used=new Array();
+                        console.info(result);
+                        //console.info(result[0].used)
+                        for (var i=0;i<result.length;i++){
+                            prouse_used.push(result[i].used);
+                            prouse_total = parseFloat(prouse_total) + parseFloat(result[i].used);
+                            
+                        }
+                        prouse_used.push(prouse_total.toString());
+
+                       
+                        setPro(prouse_name,prouse_used,prouse_total);
+                       }
+                        
+                       
+                    else{
+                        setPro(' ', ' ',' '); 
+                    }
+                }
+        });
+    };
+     if (choice == 2){
+       $.ajax({
+               url:'http://166.111.143.241:8080/pro_external/',
+               success: function(result){
+                        if (result.length!=0){
+ 
+                        var prouse_name = new Array();
+
+                        for (var i=0;i<result.length;i++){
+                            prouse_name.push(result[i].name)
+                        }
+                        prouse_name.push('overall');
+                        
+                        var prouse_total = 0;
+                        var prouse_used=new Array();
+                        console.info(result);
+                        //console.info(result[0].used)
+                        for (var i=0;i<result.length;i++){
+                            prouse_used.push(result[i].used);
+                            prouse_total = parseFloat(prouse_total) + parseFloat(result[i].used);
+                            
+                        }
+                        prouse_used.push(prouse_total.toString());
+
+                       
+                        setPro(prouse_name,prouse_used,prouse_total);
+                       }
+                        
+                       
+                    else{
+                        setPro(' ', ' ',' '); 
+                    }
+                }
+        });   
+    };   
+};       
+
+setPro=function(prouse_name,prouse_used,prouse_total){         // 路径配置
                 require.config({
                     paths: {
                         echarts: 'http://echarts.baidu.com/build/dist'
@@ -648,15 +1068,7 @@ table.gridtable td {
                     function (ec) {
                         // 基于准备好的dom，初始化echarts图表
                         var myChart = ec.init(document.getElementById('processusage')); 
-                        var pro_used = new Array();
-                        {% for used in pro_used %}
-                          pro_used.push({{used}});
-                        {% endfor %}
-
-                        var pro_name = new Array();
-                        {% for name in pro_name %}
-                          pro_name.push('{{name}}');
-                        {% endfor %}
+        
                         var option = {
                             title : {
                                 text: '进程数量统计',
@@ -696,14 +1108,14 @@ table.gridtable td {
                             xAxis : [
                                 {
                                     type : 'category',
-                                    data : pro_name,
+                                    data : prouse_name,
                                 }
                             ],
                             series : [
                                 {
                                     name:'',
                                     type:'bar',
-                                    data: pro_used,
+                                    data: prouse_used,
                                     itemStyle: {normal: {color:'rgba(255,255,0,1)', label:{show:true,textStyle:{color:'#27727B'}}, formatter:'{c} %'}},
                                 },
                                     ]
@@ -713,6 +1125,7 @@ table.gridtable td {
                         myChart.setOption(option); 
                     }
                 );
+    }
 
         </script>
     <br/>
