@@ -160,7 +160,7 @@ var csrftoken = getCookie('csrftoken');
 				<thead>
 					<tr>
 						<th data-options="field:'itemid'" width="50" sortable="true">主机名</th>
-                        <th data-options="field:'type'" width="50">类型</th>
+                        <th data-options="field:'type'" width="40">类型</th>
 						<th data-options="field:'listprice'" width="50">状态</th>
 						<th data-options="field:'unitcost'" width="80">上次监控时间</th>
 						<th data-options="field:'attr1'" width="180">状态信息</th>
@@ -174,7 +174,7 @@ var csrftoken = getCookie('csrftoken');
                        <tr>
                        <td class='detail'><a href="{% url 'hostdetailmore' host.id%}" style="color:white">{{host.HostName}}</a></td>
                        <td>{{host.HostType}}</td>
-                       <td>UP</td>
+                       <td>{{host.Status}}</td>
                        <td>{{host.LastCheck}}</td>
                        <td>{{host.PluginOutput}}</td>
                        <td>{{host.Duration}}</td>
