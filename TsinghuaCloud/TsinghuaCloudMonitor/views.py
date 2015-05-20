@@ -287,7 +287,7 @@ def memory_external(request):
     size = len(memoryuse)
     print size
     p = re.compile(r'\d+')
-    nsize=0
+    insize=0
     for k in range(0,size):
         temp_first=Service.objects.all().filter(HostName=memoryuse[k].get('HostName'),ServiceName='MemoryUsage',LastCheck=memoryuse[k].get('max'))
 
