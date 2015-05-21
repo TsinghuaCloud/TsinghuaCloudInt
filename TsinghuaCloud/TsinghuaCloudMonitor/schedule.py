@@ -7,7 +7,8 @@ import os
 import os.path
 import time
 
-host1='166.111.143.250'
+host1='192.168.173.22'
+host2='192.168.173.23'
 port='22'
 username='root'
 passwd='tsinghuanmcloud'
@@ -145,18 +146,21 @@ def test():
 			
 			sql3= "insert into TsinghuaCloudMonitor_nagios(Server,Target_IP,Target_HostName)value('%s','%s','%s')" % (sort2[0]['Server'],ipgroup[k],namegroup[k])          
 			insertData(sql3)
-			sql4="insert into TsinghuaCloudMonitor_host(IP,HostName,Owner,Info,NagiosServer,HostType)value('%s','%s','nagios','UP','%s','virtual')" % (ipgroup[k],namegroup[k],sort2[0]['Server'])
+			sql4="insert into TsinghuaCloudMonitor_host(IP,HostName,Owner,Info,NagiosServer,HostType)value('%s','%s','TsinghuaCloud','UP','%s','external')" % (ipgroup[k],namegroup[k],sort2[0]['Server'])
 			insertData(sql4)
-<<<<<<< HEAD
-			#if sort2[0]['Server'] == '01':
-				#print 'sss'
-				#ssh_cmd(host1,port,username,passwd,cmd)
-=======
-			#if sort2[0]['Server'] == '01':
-				#print 'sss'
-				#ssh_cmd(host1,port,username,passwd,cmd)
->>>>>>> lin
-            
+# <<<<<<< HEAD
+# 			#if sort2[0]['Server'] == '01':
+# 				#print 'sss'
+# 				#ssh_cmd(host1,port,username,passwd,cmd)
+# =======
+# 			#if sort2[0]['Server'] == '01':
+# 				#print 'sss'
+# 				#ssh_cmd(host1,port,username,passwd,cmd)
+# >>>>>>> lin
+            if sort2[0]['Server'] == '01':
+            	ssh_cmd(host1,port,username,passwd,cmd)
+            else:
+            	ssh_cmd(host2,port,username,passwd,cmd)
 		sql5 = "delete from TsinghuaCloudMonitor_schedule where IP = '%s'" % sort[j]['IP']
 		deleteData(sql5)
             
