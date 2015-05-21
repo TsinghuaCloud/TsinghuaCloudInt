@@ -185,7 +185,8 @@ table.gridtable td {
         action();
         cpu();
         pro();
-
+        disk();
+        eth();
         });
         setInterval("action()", 3000); 
         var choice = 0;
@@ -768,7 +769,142 @@ setCpu=function(cpuuse_name,cpuuse_used,cpuuse_percentage,cpuuse_total){
                 <!-- ECharts单文件引入 -->
         <script src="{% static 'jquery-easyui-1/echarts.js'%}"></script>
         <script type="text/javascript">
-                // 路径配置
+        setInterval("disk()", 3000);
+disk=function(){
+    if(choice == 0){
+    $.ajax({
+               url:'http://166.111.143.241:8080/disk_physical/',
+               success: function(result){
+                        if (result.length!=0){
+                        var disk_used_all =0;
+                        var disk_total_all = 0; 
+                        var diskuse_name = new Array();
+                        console.info(result);
+                        console.info(result[0].name)
+                        for (var i=0;i<result.length;i++){
+                            diskuse_name.push(result[i].name)
+                        }
+                        diskuse_name.push('Overall');
+                        
+
+                        var diskuse_used=new Array();
+                        console.info(result);
+                        //console.info(result[0].used)
+                        for (var i=0;i<result.length;i++){
+                            diskuse_used.push(result[i].used);
+                            disk_used_all = parseFloat(disk_used_all) + parseFloat(result[i].used);
+                        }
+                        console.info(disk_used_all);
+                        diskuse_used.push(disk_used_all.toString());
+
+                        var diskuse_total = new Array();
+                        for (var i=0;i<result.length;i++){
+                            diskuse_total.push(result[i].total);
+                            disk_total_all = parseFloat(disk_total_all) + parseFloat(result[i].total);
+                        }
+                        diskuse_total.push(disk_total_all.toString());                        
+
+                        setDisk(diskuse_name,diskuse_used,diskuse_total);
+                       }
+                        
+                       
+                    else{
+                        setDisk(' ', ' ',' '); 
+                    }
+                }
+        });
+    };
+    if (choice == 1){
+    $.ajax({
+               url:'http://166.111.143.241:8080/disk_virtual/',
+               success: function(result){
+                        if (result.length!=0){
+                        var disk_used_all =0;
+                        var disk_total_all = 0; 
+                        var diskuse_name = new Array();
+                        console.info(result);
+                        console.info(result[0].name)
+                        for (var i=0;i<result.length;i++){
+                            diskuse_name.push(result[i].name)
+                        }
+                        diskuse_name.push('Overall');
+                        
+
+                        var diskuse_used=new Array();
+                        console.info(result);
+                        //console.info(result[0].used)
+                        for (var i=0;i<result.length;i++){
+                            diskuse_used.push(result[i].used);
+                            disk_used_all = parseFloat(disk_used_all) + parseFloat(result[i].used);
+                        }
+                        console.info(disk_used_all);
+                        diskuse_used.push(disk_used_all.toString());
+
+                        var diskuse_total = new Array();
+                        for (var i=0;i<result.length;i++){
+                            diskuse_total.push(result[i].total);
+                            disk_total_all = parseFloat(disk_total_all) + parseFloat(result[i].total);
+                        }
+                        diskuse_total.push(disk_total_all.toString());                        
+
+                        setDisk(diskuse_name,diskuse_used,diskuse_total);
+                       }
+                        
+                       
+                    else{
+                        setDisk(' ', ' ',' '); 
+                    }
+                }
+        });
+    };
+     if (choice == 2){
+    $.ajax({
+               url:'http://166.111.143.241:8080/disk_external/',
+               success: function(result){
+                        if (result.length!=0){
+                        var disk_used_all =0;
+                        var disk_total_all = 0; 
+                        var diskuse_name = new Array();
+                        console.info(result);
+                        console.info(result[0].name)
+                        for (var i=0;i<result.length;i++){
+                            diskuse_name.push(result[i].name)
+                            console.info(result[i].name)
+                        }
+                        diskuse_name.push('Overall');
+                        
+
+                        var diskuse_used=new Array();
+                        console.info(result);
+                        //console.info(result[0].used)
+                        for (var i=0;i<result.length;i++){
+                            diskuse_used.push(result[i].used);
+                            disk_used_all = parseFloat(disk_used_all) + parseFloat(result[i].used);
+                        }
+                        console.info(disk_used_all);
+                        diskuse_used.push(disk_used_all.toString());
+
+                        var diskuse_total = new Array();
+                        for (var i=0;i<result.length;i++){
+                            diskuse_total.push(result[i].total);
+                            disk_total_all = parseFloat(disk_total_all) + parseFloat(result[i].total);
+                        }
+                        diskuse_total.push(disk_total_all.toString());                        
+
+                        setDisk(diskuse_name,diskuse_used,diskuse_total);
+                       }
+                        
+                       
+                    else{
+                        setDisk(' ', ' ',' '); 
+                    }
+                }
+        });
+     };   
+ };   
+
+setDisk=function(diskuse_name,diskuse_used,diskuse_total){
+              // 路径配置
                 require.config({
                     paths: {
                         echarts: 'http://echarts.baidu.com/build/dist'
@@ -783,39 +919,15 @@ setCpu=function(cpuuse_name,cpuuse_used,cpuuse_percentage,cpuuse_total){
                     ],
                     function (ec) {
                         // 基于准备好的dom，初始化echarts图表
-                        var disk_used_all =0;
-                        var disk_total_all = 0; 
-                        var disk_name = new Array();
                         
-                        {% for name in diskusage_name %}
-                          disk_name.push('{{name}}');
-                        {% endfor %}
-                        disk_name.push('Overall');
-
-                        var disk_used = new Array();
-                        {% for used in diskusage_used %}
-                          disk_used.push({{used}});
-                          disk_used_all = disk_used_all + {{used}};
-                        {% endfor %}
-                        disk_used.push(disk_used_all);
-                        //alert(disk_used_all);
-
-                        var disk_total = new Array();
-                        {% for total in diskusage_total %}
-                          disk_total.push({{total}});
-                          disk_total_all = disk_total_all + {{total}};
-                        {% endfor %}
-                        //alert(memory_total_all);
-                        disk_total.push(disk_total_all);
-
-                        var number = disk_total.length;
+                        var number = diskuse_total.length;
                         //alert(number);
                         var mark = new Array();
                         for(var i=0;i<number;i++){
                             var o = {
-                                value: disk_total[i] ? (disk_used[i]/disk_total[i]).toFixed(2) : 0,
+                                value: diskuse_total[i] ? (diskuse_used[i]/diskuse_total[i]).toFixed(2) : 0,
                                 xAxis:i,
-                                yAxis:(disk_total[i]+200000)
+                                yAxis:(diskuse_total[i]+200000)
                             }
                             //alert(o);
                             mark.push(o);
@@ -850,7 +962,7 @@ setCpu=function(cpuuse_name,cpuuse_used,cpuuse_percentage,cpuuse_total){
                             xAxis : [
                                 {
                                     type : 'category',
-                                    data : disk_name
+                                    data : diskuse_name
                                 },
                                 {
                                     type : 'category',
@@ -859,7 +971,7 @@ setCpu=function(cpuuse_name,cpuuse_used,cpuuse_percentage,cpuuse_total){
                                     axisLabel: {show:false},
                                     splitArea: {show:false},
                                     splitLine: {show:false},
-                                    data : disk_name
+                                    data : diskuse_name
                                 }
                             ],
                             yAxis : [
@@ -874,7 +986,7 @@ setCpu=function(cpuuse_name,cpuuse_used,cpuuse_percentage,cpuuse_total){
                                     name:'磁盘使用情况－已用',
                                     type:'bar',
                                     itemStyle: {normal: {color:'rgba(255,106,106,1)', label:{show:true,textStyle:{color:'#27727B'}}}},
-                                    data:disk_used
+                                    data:diskuse_used
                                 },
                            
 
@@ -883,7 +995,7 @@ setCpu=function(cpuuse_name,cpuuse_used,cpuuse_percentage,cpuuse_total){
                                     type:'bar',
                                     xAxisIndex:1,
                                     itemStyle: {normal: {color:'rgba(255,106,106,0.6)', label:{show:true}}},
-                                    data:disk_total,
+                                    data:diskuse_total,
 
                                     markPoint : {
                                         data : mark,
@@ -905,7 +1017,7 @@ setCpu=function(cpuuse_name,cpuuse_used,cpuuse_percentage,cpuuse_total){
                         myChart.setOption(option); 
                     }
                 );
-
+    }
         </script>
     <br/>
     <br/>
@@ -1164,7 +1276,113 @@ setPro=function(prouse_name,prouse_used,prouse_total){         // 路径配置
         <!-- ECharts单文件引入 -->
         <script src="{% static 'jquery-easyui-1/echarts.js'%}"></script>
         <script type="text/javascript">
-                // 路径配置
+        setInterval("eth()", 3000);
+eth=function(){
+    if(choice == 0){
+    $.ajax({
+               url:'http://166.111.143.241:8080/eth_physical/',
+               success: function(result){
+                        if (result.length!=0){
+
+                        var eth_name = new Array();
+
+                        for (var i=0;i<result.length;i++){
+                            eth_name.push(result[i].name)
+                        }
+
+                        var eth_in=new Array();
+                        for (var i=0;i<result.length;i++){
+                            eth_in.push(result[i].in);
+                        }
+
+
+                        var eth_out = new Array();
+                        for (var i=0;i<result.length;i++){
+                            eth_out.push(result[i].out);
+                        }
+                     
+
+                        setEth(eth_name,eth_in,eth_out);
+                       }
+                        
+                       
+                    else{
+                        setEth(' ', ' ',' '); 
+                    }
+                }
+        });
+    };
+    if (choice == 1){
+     $.ajax({
+               url:'http://166.111.143.241:8080/eth_virtual/',
+               success: function(result){
+                        if (result.length!=0){
+
+                        var eth_name = new Array();
+
+                        for (var i=0;i<result.length;i++){
+                            eth_name.push(result[i].name)
+                        }
+
+                        var eth_in=new Array();
+                        for (var i=0;i<result.length;i++){
+                            eth_in.push(result[i].in);
+                        }
+
+
+                        var eth_out = new Array();
+                        for (var i=0;i<result.length;i++){
+                            eth_out.push(result[i].out);
+                        }
+                     
+
+                        setEth(eth_name,eth_in,eth_out);
+                       }
+                        
+                       
+                    else{
+                        setEth(' ', ' ',' '); 
+                    }
+                }
+        });
+    };
+     if (choice == 2){
+    $.ajax({
+               url:'http://166.111.143.241:8080/eth_external/',
+               success: function(result){
+                        if (result.length!=0){
+
+                        var eth_name = new Array();
+
+                        for (var i=0;i<result.length;i++){
+                            eth_name.push(result[i].name)
+                        }
+
+                        var eth_in=new Array();
+                        for (var i=0;i<result.length;i++){
+                            eth_in.push(result[i].in);
+                        }
+
+
+                        var eth_out = new Array();
+                        for (var i=0;i<result.length;i++){
+                            eth_out.push(result[i].out);
+                        }
+                     
+
+                        setEth(eth_name,eth_in,eth_out);
+                       }
+                        
+                       
+                    else{
+                        setEth(' ', ' ',' '); 
+                    }
+                }
+        });
+     };   
+ };   
+
+setEth=function(eth_name,eth_in,eth_out){                // 路径配置
                 require.config({
                     paths: {
                         echarts: 'http://echarts.baidu.com/build/dist'
@@ -1180,20 +1398,6 @@ setPro=function(prouse_name,prouse_used,prouse_total){         // 路径配置
                     function (ec) {
                         // 基于准备好的dom，初始化echarts图表
                         var myChart = ec.init(document.getElementById('ethusage')); 
-                        var eth_in = new Array();
-                        {% for eth in eth_in %}
-                          eth_in.push({{eth}});
-                        {% endfor %}
-
-                        var eth_out = new Array();
-                        {% for eth in eth_out %}
-                          eth_out.push({{eth}});
-                        {% endfor %}
-
-                        var eth_name = new Array();
-                        {% for name in eth_name %}
-                          eth_name.push('{{name}}');
-                        {% endfor %}
 
                         var option = {
                             title : {
@@ -1260,7 +1464,7 @@ setPro=function(prouse_name,prouse_used,prouse_total){         // 路径配置
                         myChart.setOption(option); 
                     }
                 );
-                        
+        }                
 
         </script>
     </div>

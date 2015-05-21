@@ -469,7 +469,185 @@ def pro_external(request):
             processusage_object.append(processusage_dic) 
             insize = insize +1 
     return HttpResponse(json.dumps(processusage_object), content_type = "application/json")  
-    
+
+def disk_physical(request):
+    diskusage_name=[]
+    diskusage_used=[]
+    diskusage_total=[]
+    diskusage_object=[]
+    diskusage=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck')).filter(ServiceName='disk')
+    size = len(diskusage)
+    p = re.compile(r'\d+')
+    insize = 0
+    for k in range(0,size):
+        temp=get_object_or_404(Service,HostName=diskusage[k].get('HostName'),ServiceName='disk',LastCheck=diskusage[k].get('max'))
+        hosttype = get_object_or_404(Host,HostName=temp.HostName)
+        temp.HostType = hosttype.HostType        
+ 
+        if temp.HostType == 'physical': 
+            diskusage_name.append(temp.HostName)          
+            if temp.PerformanceData == '':
+               diskusage_used.append(0)
+               diskusage_total.append(0)
+            else:
+               diskusage_used.append(p.findall(temp.PerformanceData)[0])
+               diskusage_total.append(p.findall(temp.PerformanceData)[4])
+            if diskusage_total[k] == 0:
+               tem = 0
+            else:
+               tem = format(float(diskusage_used[insize])/float(diskusage_total[insize]),'.2%')
+       
+            diskusage_dic = {'name': diskusage_name[insize],'used': diskusage_used[insize],'total': diskusage_total[insize],'percentage': tem}
+            diskusage_object.append(diskusage_dic)
+            insize = insize +1
+    return HttpResponse(json.dumps(diskusage_object), content_type = "application/json") 
+
+def disk_virtual(request):
+    diskusage_name=[]
+    diskusage_used=[]
+    diskusage_total=[]
+    diskusage_object=[]
+    diskusage=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck')).filter(ServiceName='disk')
+    size = len(diskusage)
+    p = re.compile(r'\d+')
+    insize = 0
+    for k in range(0,size):
+        temp=get_object_or_404(Service,HostName=diskusage[k].get('HostName'),ServiceName='disk',LastCheck=diskusage[k].get('max'))
+        hosttype = get_object_or_404(Host,HostName=temp.HostName)
+        temp.HostType = hosttype.HostType        
+ 
+        if temp.HostType == 'virtual': 
+            diskusage_name.append(temp.HostName)
+            if temp.PerformanceData == '':
+               diskusage_used.append(0)
+               diskusage_total.append(0)
+            else:
+               diskusage_used.append(p.findall(temp.PerformanceData)[0])
+               diskusage_total.append(p.findall(temp.PerformanceData)[4])
+            if diskusage_total[insize] == 0:
+               tem = 0
+            else:
+               tem = format(float(diskusage_used[insize])/float(diskusage_total[insize]),'.2%')
+       
+            diskusage_dic = {'name': diskusage_name[insize],'used': diskusage_used[insize],'total': diskusage_total[insize],'percentage': tem}
+            diskusage_object.append(diskusage_dic)
+            insize = insize +1
+    return HttpResponse(json.dumps(diskusage_object), content_type = "application/json") 
+
+def disk_external(request):
+    diskusage_name=[]
+    diskusage_used=[]
+    diskusage_total=[]
+    diskusage_object=[]
+    diskusage=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck')).filter(ServiceName='disk')
+    size = len(diskusage)
+    p = re.compile(r'\d+')
+    insize = 0
+    for k in range(0,size):
+        temp=get_object_or_404(Service,HostName=diskusage[k].get('HostName'),ServiceName='disk',LastCheck=diskusage[k].get('max'))
+        hosttype = get_object_or_404(Host,HostName=temp.HostName)
+        temp.HostType = hosttype.HostType        
+
+        if temp.HostType == 'external': 
+            diskusage_name.append(temp.HostName)
+            print temp.HostType
+            if temp.PerformanceData == '':
+               diskusage_used.append(0)
+               diskusage_total.append(0)
+            else:
+               diskusage_used.append(p.findall(temp.PerformanceData)[0])
+               diskusage_total.append(p.findall(temp.PerformanceData)[4])
+            if diskusage_total[insize] == 0:
+               tem = 0
+            else:
+               tem = format(float(diskusage_used[insize])/float(diskusage_total[insize]),'.2%')
+       
+            diskusage_dic = {'name': diskusage_name[insize],'used': diskusage_used[insize],'total': diskusage_total[insize],'percentage': tem}
+            diskusage_object.append(diskusage_dic)
+            insize = insize +1
+    return HttpResponse(json.dumps(diskusage_object), content_type = "application/json")         
+
+def eth_external(request):
+    eth_name = []
+    eth_in =[]
+    eth_out = []
+    eth_object = []
+    eth=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck')).filter(ServiceName='Traffic_eth0')
+    size = len(eth)
+    p = re.compile(r'\d+')
+    insize = 0
+    for k in range(0,size):
+        temp=get_object_or_404(Service,HostName=eth[k].get('HostName'),ServiceName='Traffic_eth0',LastCheck= eth[k].get('max'))
+        hosttype = get_object_or_404(Host,HostName=temp.HostName)
+        temp.HostType = hosttype.HostType        
+
+        if temp.HostType == 'external':         
+            eth_name.append(temp.HostName)  
+            if temp.PerformanceData == '':
+               eth_in.append(0)
+               eth_out.append(0)
+            else:
+               eth_in.append(p.findall(temp.PerformanceData)[0])  
+               eth_out.append(p.findall(temp.PerformanceData)[5]) 
+            eth_dic = {'name': eth_name[insize],'in': eth_in[insize],'out':eth_out[insize]}
+            eth_object.append(eth_dic) 
+            insize = insize+1    
+    return HttpResponse(json.dumps(eth_object), content_type = "application/json")  
+
+def eth_physical(request):
+    eth_name = []
+    eth_in =[]
+    eth_out = []
+    eth_object = []
+    eth=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck')).filter(ServiceName='Traffic_eth0')
+    size = len(eth)
+    p = re.compile(r'\d+')
+    insize = 0
+    for k in range(0,size):
+        temp=get_object_or_404(Service,HostName=eth[k].get('HostName'),ServiceName='Traffic_eth0',LastCheck= eth[k].get('max'))
+        hosttype = get_object_or_404(Host,HostName=temp.HostName)
+        temp.HostType = hosttype.HostType        
+
+        if temp.HostType == 'physical':         
+            eth_name.append(temp.HostName)  
+            if temp.PerformanceData == '':
+               eth_in.append(0)
+               eth_out.append(0)
+            else:
+               eth_in.append(p.findall(temp.PerformanceData)[0])  
+               eth_out.append(p.findall(temp.PerformanceData)[5]) 
+            eth_dic = {'name': eth_name[insize],'in': eth_in[insize],'out':eth_out[insize]}
+            eth_object.append(eth_dic) 
+            insize = insize+1    
+    return HttpResponse(json.dumps(eth_object), content_type = "application/json") 
+
+def eth_virtual(request):
+    eth_name = []
+    eth_in =[]
+    eth_out = []
+    eth_object = []
+    eth=Service.objects.all().values('ServiceName','HostName').annotate(max=Max('LastCheck')).filter(ServiceName='Traffic_eth0')
+    size = len(eth)
+    p = re.compile(r'\d+')
+    insize = 0
+    for k in range(0,size):
+        temp=get_object_or_404(Service,HostName=eth[k].get('HostName'),ServiceName='Traffic_eth0',LastCheck= eth[k].get('max'))
+        hosttype = get_object_or_404(Host,HostName=temp.HostName)
+        temp.HostType = hosttype.HostType        
+
+        if temp.HostType == 'virtual':         
+            eth_name.append(temp.HostName)  
+            if temp.PerformanceData == '':
+               eth_in.append(0)
+               eth_out.append(0)
+            else:
+               eth_in.append(p.findall(temp.PerformanceData)[0])  
+               eth_out.append(p.findall(temp.PerformanceData)[5]) 
+            eth_dic = {'name': eth_name[insize],'in': eth_in[insize],'out':eth_out[insize]}
+            eth_object.append(eth_dic) 
+            insize = insize+1    
+    return HttpResponse(json.dumps(eth_object), content_type = "application/json") 
+
 
 def totalcompare(request):
     memoryuse_name=[]
