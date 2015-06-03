@@ -209,343 +209,812 @@ def hoststatus(request):
 
     return render(request, 'TsinghuaCloudMonitor/hoststatus.html', {'host': host})
 
-
 def memory_physical(request):
-    memoryuse_name = []
-    memoryuse_total = []
-    memoryuse_used = []
-    memoryuse_object = []
-    memoryuse = Service.objects.all().values('ServiceName', 'HostName').annotate(max=Max('LastCheck')).filter(
-        ServiceName='MemoryUsage',HostName__in=Host.objects.all().values('HostName'))
-    size = len(memoryuse)
-    print size
-    p = re.compile(r'\d+')
-    insize = 0
-    for k in range(0, size):
-        temp_first = Service.objects.all().filter(HostName=memoryuse[k].get('HostName'), ServiceName='MemoryUsage',
-                                                  LastCheck=memoryuse[k].get('max'))
+    # Get parameters from URL
+    cur_page_no = request.GET.get('page')
+    item_per_page = request.GET.get('pageelem')
 
-        if len(temp_first) > 1:
-            temp = temp_first[0]
+    # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
+    if cur_page_no == None or cur_page_no == '':
+        cur_page_no = 1
+    elif cur_page_no <= 0:
+        cur_page_no = 1
+    else:
+        cur_page_no = int(cur_page_no)
+
+    if item_per_page == None or item_per_page == '':
+        item_per_page = 4
+    else:
+        item_per_page = int(item_per_page)
+        if item_per_page <= 4:
+            item_per_page = 4
+        elif item_per_page >= 10:
+            item_per_page = 4
+
+    my_host_list = Host.objects.all().values('HostName', 'HostType').filter(HostType = 'physical')
+
+    host_count = len(my_host_list)
+    start_pos = 0
+    end_pos = 0
+    print "host_count = " + str(host_count)
+
+    # Get start and end of consulting host
+    if (cur_page_no - 1) * item_per_page >= host_count:
+        start_pos = 0
+        if item_per_page > host_count:
+            end_pos = host_count
         else:
-            temp = get_object_or_404(Service, HostName=memoryuse[k].get('HostName'), ServiceName='MemoryUsage',
-                                     LastCheck=memoryuse[k].get('max'))
-        hosttype = get_object_or_404(Host, HostName=temp.HostName)
-        temp.HostType = hosttype.HostType
+            end_pos = item_per_page
+    else:
+        start_pos = (cur_page_no - 1) * item_per_page
+        if start_pos + item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = start_pos + item_per_page
+    print "start = " + str(start_pos) + ' | end = ' + str(end_pos)
 
-        if temp.HostType == 'physical':
-            print temp.HostType
-            memoryuse_name.append(temp.HostName)
-            if temp.PerformanceData == '':
-                memoryuse_used.append(0)
-                memoryuse_total.append(0)
+    memory_name = ''
+    memory_used = ''
+    memory_total = ''
+    memory_percentage = 0
+    memory_json_obj = []
+    # Get hosts' service records
+    for i in range(start_pos, end_pos):
+        # Get last check time for current host
+        latest_check = Service.objects.values('HostName').annotate(LastCheck = Max('LastCheck'))\
+            .filter(HostName = my_host_list[i].get('HostName'), ServiceName = 'MemoryUsage')
 
+        # No record found.
+        if len(latest_check) == 0:
+            svc_rec_obj = None
+        else:
+            svc_rec_obj = get_object_or_404(Service, HostName = my_host_list[i].get('HostName'),ServiceName='MemoryUsage',
+                                        LastCheck=latest_check[0].get('LastCheck'))
+
+        # Form json object
+        if svc_rec_obj == None:                               # Got no such host's record
+            memory_name = my_host_list[i].get('HostName')
+            memory_used = 0
+            memory_total = 0
+            memory_percentage = 0
+        else:
+            memory_name = my_host_list[i].get('HostName')
+            if svc_rec_obj.PerformanceData == '':
+                memory_used = 0
+                memory_total = 0
+                memory_percentage = 0
             else:
-                memoryuse_used.append(p.findall(temp.PerformanceData)[1])
-                memoryuse_total.append(p.findall(temp.PerformanceData)[0])
+                p = re.compile(r'\d+')
+                memory_used = p.findall(svc_rec_obj.PerformanceData)[1]
+                memory_total = p.findall(svc_rec_obj.PerformanceData)[0]
+                if memory_total == 0:
+                    memory_percentage = 0
+                else:
+                    memory_percentage = format(float(memory_used) / float(memory_total), '.2%')
+        json_data = {'name': memory_name, 'used': memory_used, 'total': memory_total, 'percentage': memory_percentage}
+        memory_json_obj.append(json_data)
 
-            if memoryuse_total[insize] == 0:
-                temp = 0
-            else:
-                temp = format(float(memoryuse_used[insize]) / float(memoryuse_total[insize]), '.2%')
-
-            memoryuse_dic = {'name': memoryuse_name[insize], 'used': memoryuse_used[insize],
-                             'total': memoryuse_total[insize], 'percentage': temp}
-            memoryuse_object.append(memoryuse_dic)
-            insize = insize + 1
-    print memoryuse_name
-    return HttpResponse(json.dumps(memoryuse_object), content_type="application/json")
-
+    return HttpResponse(json.dumps(memory_json_obj), content_type="application/json")
 
 def memory_virtual(request):
-    memoryuse_name = []
-    memoryuse_total = []
-    memoryuse_used = []
-    memoryuse_object = []
-    memoryuse = Service.objects.all().values('ServiceName', 'HostName').annotate(max=Max('LastCheck')).filter(
-        ServiceName='MemoryUsage',HostName__in=Host.objects.all().values('HostName'))
-    size = len(memoryuse)
-    print size
-    p = re.compile(r'\d+')
-    insize = 0
-    for k in range(0, size):
-        temp_first = Service.objects.all().filter(HostName=memoryuse[k].get('HostName'), ServiceName='MemoryUsage',
-                                                  LastCheck=memoryuse[k].get('max'))
+    # Get parameters from URL
+    cur_page_no = request.GET.get('page')
+    item_per_page = request.GET.get('pageelem')
 
-        if len(temp_first) > 1:
-            temp = temp_first[0]
+    # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
+    if cur_page_no == None or cur_page_no == '':
+        cur_page_no = 1
+    elif cur_page_no <= 0:
+        cur_page_no = 1
+    else:
+        cur_page_no = int(cur_page_no)
+
+    if item_per_page == None or item_per_page == '':
+        item_per_page = 4
+    else:
+        item_per_page = int(item_per_page)
+        if item_per_page <= 4:
+            item_per_page = 4
+        elif item_per_page >= 10:
+            item_per_page = 4
+
+    my_host_list = Host.objects.all().values('HostName', 'HostType').filter(HostType = 'virtual')
+
+    host_count = len(my_host_list)
+    start_pos = 0
+    end_pos = 0
+    print "host_count = " + str(host_count)
+
+    # Get start and end of consulting host
+    if (cur_page_no - 1) * item_per_page >= host_count:
+        start_pos = 0
+        if item_per_page > host_count:
+            end_pos = host_count
         else:
-            temp = get_object_or_404(Service, HostName=memoryuse[k].get('HostName'), ServiceName='MemoryUsage',
-                                     LastCheck=memoryuse[k].get('max'))
-        hosttype = get_object_or_404(Host, HostName=temp.HostName)
-        temp.HostType = hosttype.HostType
+            end_pos = item_per_page
+    else:
+        start_pos = (cur_page_no - 1) * item_per_page
+        if start_pos + item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = start_pos + item_per_page
+    print "start = " + str(start_pos) + ' | end = ' + str(end_pos)
 
-        if temp.HostType == 'virtual':
-            print temp.HostType
-            memoryuse_name.append(temp.HostName)
-            if temp.PerformanceData == '':
-                memoryuse_used.append(0)
-                memoryuse_total.append(0)
+    memory_name = ''
+    memory_used = ''
+    memory_total = ''
+    memory_percentage = 0
+    memory_json_obj = []
+    # Get hosts' service records
+    for i in range(start_pos, end_pos):
+        # Get last check time for current host
+        latest_check = Service.objects.values('HostName').annotate(LastCheck = Max('LastCheck'))\
+            .filter(HostName = my_host_list[i].get('HostName'), ServiceName = 'MemoryUsage')
 
+        # No record found.
+        if len(latest_check) == 0:
+            svc_rec_obj = None
+        else:
+            svc_rec_obj = get_object_or_404(Service, HostName = my_host_list[i].get('HostName'),ServiceName='MemoryUsage',
+                                        LastCheck=latest_check[0].get('LastCheck'))
+
+        # Form json object
+        if svc_rec_obj == None:                               # Got no such host's record
+            memory_name = my_host_list[i].get('HostName')
+            memory_used = 0
+            memory_total = 0
+            memory_percentage = 0
+        else:
+            memory_name = my_host_list[i].get('HostName')
+            if svc_rec_obj.PerformanceData == '':
+                memory_used = 0
+                memory_total = 0
+                memory_percentage = 0
             else:
-                memoryuse_used.append(p.findall(temp.PerformanceData)[1])
-                memoryuse_total.append(p.findall(temp.PerformanceData)[0])
+                p = re.compile(r'\d+')
+                memory_used = p.findall(svc_rec_obj.PerformanceData)[1]
+                memory_total = p.findall(svc_rec_obj.PerformanceData)[0]
+                if memory_total == 0:
+                    memory_percentage = 0
+                else:
+                    memory_percentage = format(float(memory_used) / float(memory_total), '.2%')
+        json_data = {'name': memory_name, 'used': memory_used, 'total': memory_total, 'percentage': memory_percentage}
+        memory_json_obj.append(json_data)
 
-            if memoryuse_total[insize] == 0:
-                temp = 0
-            else:
-                temp = format(float(memoryuse_used[insize]) / float(memoryuse_total[insize]), '.2%')
-
-            memoryuse_dic = {'name': memoryuse_name[insize], 'used': memoryuse_used[insize],
-                             'total': memoryuse_total[insize], 'percentage': temp}
-            memoryuse_object.append(memoryuse_dic)
-            insize = insize + 1
-    print memoryuse_name
-    return HttpResponse(json.dumps(memoryuse_object), content_type="application/json")
-
+    return HttpResponse(json.dumps(memory_json_obj), content_type="application/json")
 
 def cpu_physical(request):
-    cpuloaduse_name = []
-    cpuloaduse_used = []
-    cpuloaduse_object = []
-    cpuloaduse = Service.objects.all().values('ServiceName', 'HostName').annotate(max=Max('LastCheck'))\
-        .filter(ServiceName='cpuload',HostName__in=Host.objects.all().values('HostName'))
-    size = len(cpuloaduse)
-    p = re.compile(r'(\d+)\.(\d*)')
-    insize = 0
-    for k in range(0, size):
-        temp = get_object_or_404(Service, HostName=cpuloaduse[k].get('HostName'), ServiceName='cpuload',
-                                 LastCheck=cpuloaduse[k].get('max'))
-        hosttype = get_object_or_404(Host, HostName=temp.HostName)
-        temp.HostType = hosttype.HostType
+    # Get parameters from URL
+    cur_page_no = request.GET.get('page')
+    item_per_page = request.GET.get('pageelem')
 
-        if temp.HostType == 'physical':
-            cpuloaduse_name.append(temp.HostName)
-            if temp.PerformanceData == '':
-                cpuloaduse_used.append(0)
+    # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
+    if cur_page_no == None or cur_page_no == '':
+        cur_page_no = 1
+    elif cur_page_no <= 0:
+        cur_page_no = 1
+    else:
+        cur_page_no = int(cur_page_no)
+
+    if item_per_page == None or item_per_page == '':
+        item_per_page = 4
+    else:
+        item_per_page = int(item_per_page)
+        if item_per_page <= 4:
+            item_per_page = 4
+        elif item_per_page >= 10:
+            item_per_page = 4
+
+    my_host_list = Host.objects.all().values('HostName', 'HostType').filter(HostType = 'physical')
+
+    host_count = len(my_host_list)
+    start_pos = 0
+    end_pos = 0
+
+    # Get start and end of consulting host
+    if (cur_page_no - 1) * item_per_page >= host_count:
+        start_pos = 0
+        if item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = item_per_page
+    else:
+        start_pos = (cur_page_no - 1) * item_per_page
+        if start_pos + item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = start_pos + item_per_page
+
+
+    cpu_name = ''
+    cpu_used = ''
+    cpu_perc = ''
+    cpu_json_obj = []
+    # Get hosts' service records
+    for i in range(start_pos, end_pos):
+        # Get last check time for current host
+        latest_check = Service.objects.values('HostName').annotate(last_check = Max('LastCheck'))\
+            .filter(HostName = my_host_list[i].get('HostName'), ServiceName = 'cpuload')
+
+        # No record found.
+        if len(latest_check) == 0:
+            svc_rec_obj = None
+        else:
+            svc_rec_obj = get_object_or_404(Service, HostName = my_host_list[i].get('HostName'),ServiceName='cpuload',
+                                        LastCheck=latest_check[0].get('last_check'))
+
+        # Form json object
+        if svc_rec_obj == None:                               # Got no such host's record
+            cpu_name = my_host_list[i].get('HostName')
+            cpu_used = '0.0'
+            cpu_perc = '0.0%'
+        else:
+            cpu_name = my_host_list[i].get('HostName')
+            if svc_rec_obj.PerformanceData == '':
+                cpu_used = '0.0'
+                cpu_perc = '0.0%'
             else:
-                cpuloaduse_used.append('.'.join(p.findall(temp.PerformanceData)[3]))
+                p = re.compile(r'\d+')
+                cpu_used = p.findall(svc_rec_obj.PerformanceData)[3]
+                cpu_perc = format(float(cpu_used), '.2%')
+        json_data = {'name': cpu_name, 'used': cpu_used, 'percentage': cpu_perc}
+        cpu_json_obj.append(json_data)
 
-            tem = format(float(cpuloaduse_used[insize]), '.2%')
-            cpuloaduse_dic = {'name': cpuloaduse_name[insize], 'used': cpuloaduse_used[insize], 'percentage': tem}
-            cpuloaduse_object.append(cpuloaduse_dic)
-            insize = insize + 1
-    return HttpResponse(json.dumps(cpuloaduse_object), content_type="application/json")
-
+    return HttpResponse(json.dumps(cpu_json_obj), content_type="application/json")
 
 def cpu_virtual(request):
-    cpuloaduse_name = []
-    cpuloaduse_used = []
-    cpuloaduse_object = []
-    cpuloaduse = Service.objects.all().values('ServiceName', 'HostName').annotate(max=Max('LastCheck'))\
-        .filter(ServiceName='cpuload',HostName__in=Host.objects.all().values('HostName'))
-    print cpuloaduse
-    size = len(cpuloaduse)
-    p = re.compile(r'(\d+)\.(\d*)')
-    insize = 0
-    for k in range(0, size):
-        temp = get_object_or_404(Service, HostName=cpuloaduse[k].get('HostName'), ServiceName='cpuload',
-                                 LastCheck=cpuloaduse[k].get('max'))
-        hosttype = get_object_or_404(Host, HostName=temp.HostName)
-        temp.HostType = hosttype.HostType
+    # Get parameters from URL
+    cur_page_no = request.GET.get('page')
+    item_per_page = request.GET.get('pageelem')
 
-        if temp.HostType == 'virtual':
-            cpuloaduse_name.append(temp.HostName)
-            if temp.PerformanceData == '':
-                cpuloaduse_used.append(0)
+    # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
+    if cur_page_no == None or cur_page_no == '':
+        cur_page_no = 1
+    elif cur_page_no <= 0:
+        cur_page_no = 1
+    else:
+        cur_page_no = int(cur_page_no)
+
+    if item_per_page == None or item_per_page == '':
+        item_per_page = 4
+    else:
+        item_per_page = int(item_per_page)
+        if item_per_page <= 4:
+            item_per_page = 4
+        elif item_per_page >= 10:
+            item_per_page = 4
+
+    my_host_list = Host.objects.all().values('HostName', 'HostType').filter(HostType = 'virtual')
+
+    host_count = len(my_host_list)
+    start_pos = 0
+    end_pos = 0
+
+    # Get start and end of consulting host
+    if (cur_page_no - 1) * item_per_page >= host_count:
+        start_pos = 0
+        if item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = item_per_page
+    else:
+        start_pos = (cur_page_no - 1) * item_per_page
+        if start_pos + item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = start_pos + item_per_page
+
+
+    cpu_name = ''
+    cpu_used = ''
+    cpu_perc = ''
+    cpu_json_obj = []
+    # Get hosts' service records
+    for i in range(start_pos, end_pos):
+        # Get last check time for current host
+        latest_check = Service.objects.values('HostName').annotate(last_check = Max('LastCheck'))\
+            .filter(HostName = my_host_list[i].get('HostName'), ServiceName = 'cpuload')
+
+        # No record found.
+        if len(latest_check) == 0:
+            svc_rec_obj = None
+        else:
+            svc_rec_obj = get_object_or_404(Service, HostName = my_host_list[i].get('HostName'),ServiceName='cpuload',
+                                        LastCheck=latest_check[0].get('last_check'))
+
+        # Form json object
+        if svc_rec_obj == None:                               # Got no such host's record
+            cpu_name = my_host_list[i].get('HostName')
+            cpu_used = '0.0'
+            cpu_perc = '0.0%'
+        else:
+            cpu_name = my_host_list[i].get('HostName')
+            if svc_rec_obj.PerformanceData == '':
+                cpu_used = '0.0'
+                cpu_perc = '0.0%'
             else:
-                cpuloaduse_used.append('.'.join(p.findall(temp.PerformanceData)[3]))
+                p = re.compile(r'\d+')
+                cpu_used = p.findall(svc_rec_obj.PerformanceData)[3]
+                cpu_perc = format(float(cpu_used), '.2%')
+        json_data = {'name': cpu_name, 'used': cpu_used, 'percentage': cpu_perc}
+        cpu_json_obj.append(json_data)
 
-            tem = format(float(cpuloaduse_used[insize]), '.2%')
-            cpuloaduse_dic = {'name': cpuloaduse_name[insize], 'used': cpuloaduse_used[insize], 'percentage': tem}
-            cpuloaduse_object.append(cpuloaduse_dic)
-            insize = insize + 1
-    return HttpResponse(json.dumps(cpuloaduse_object), content_type="application/json")
-
+    return HttpResponse(json.dumps(cpu_json_obj), content_type="application/json")
 
 def pro_physical(request):
-    pro_name = []
-    pro_used = []
-    processusage_object = []
-    prousage = Service.objects.all().values('ServiceName', 'HostName').annotate(max=Max('LastCheck'))\
-        .filter(ServiceName='total-procs',HostName__in=Host.objects.all().values('HostName'))
-    size = len(prousage)
-    p = re.compile(r'\d+')
-    insize = 0
-    for k in range(0, size):
-        temp = get_object_or_404(Service, HostName=prousage[k].get('HostName'), ServiceName='total-procs',
-                                 LastCheck=prousage[k].get('max'))
-        hosttype = get_object_or_404(Host, HostName=temp.HostName)
-        temp.HostType = hosttype.HostType
-        if temp.HostType == 'physical':
-            pro_name.append(temp.HostName)
-            if temp.PerformanceData == '':
-                pro_used.append(0)
-            else:
-                pro_used.append(p.findall(temp.PerformanceData)[0])
-            processusage_dic = {'name': pro_name[insize], 'used': pro_used[insize]}
-            processusage_object.append(processusage_dic)
-            insize = insize + 1
-    return HttpResponse(json.dumps(processusage_object), content_type="application/json")
+    # Get parameters from URL
+    cur_page_no = request.GET.get('page')
+    item_per_page = request.GET.get('pageelem')
 
+    # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
+    if cur_page_no == None or cur_page_no == '':
+        cur_page_no = 1
+    elif cur_page_no <= 0:
+        cur_page_no = 1
+    else:
+        cur_page_no = int(cur_page_no)
+
+    if item_per_page == None or item_per_page == '':
+        item_per_page = 4
+    else:
+        item_per_page = int(item_per_page)
+        if item_per_page <= 4:
+            item_per_page = 4
+        elif item_per_page >= 10:
+            item_per_page = 4
+
+    my_host_list = Host.objects.all().values('HostName', 'HostType').filter(HostType = 'physical')
+
+    host_count = len(my_host_list)
+    start_pos = 0
+    end_pos = 0
+
+    # Get start and end of consulting host
+    if (cur_page_no - 1) * item_per_page >= host_count:
+        start_pos = 0
+        if item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = item_per_page
+    else:
+        start_pos = (cur_page_no - 1) * item_per_page
+        if start_pos + item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = start_pos + item_per_page
+
+    pro_name = ''
+    pro_used = ''
+    pro_json_obj = []
+    # Get hosts' service records
+    for i in range(start_pos, end_pos):
+        # Get last check time for current host
+        latest_check = Service.objects.values('HostName').annotate(LastCheck = Max('LastCheck'))\
+            .filter(HostName = my_host_list[i].get('HostName'), ServiceName = 'total-procs')
+
+        # No record found.
+        if len(latest_check) == 0:
+            svc_rec_obj = None
+        else:
+            svc_rec_obj = get_object_or_404(Service, HostName = my_host_list[i].get('HostName'),ServiceName='total-procs',
+                                        LastCheck=latest_check[0].get('LastCheck'))
+
+        if svc_rec_obj == None:                               # Got no such host's record
+            pro_name = my_host_list[i].get('HostName')
+            pro_used = '0.0'
+        else:
+            pro_name = my_host_list[i].get('HostName')
+            if svc_rec_obj.PerformanceData == '':
+                pro_used = '0.0'
+            else:
+                p = re.compile(r'\d+')
+                pro_used = p.findall(svc_rec_obj.PerformanceData)[0]
+        json_data = {'name': pro_name, 'used': pro_used}
+        pro_json_obj.append(json_data)
+
+    return HttpResponse(json.dumps(pro_json_obj), content_type="application/json")
 
 def pro_virtual(request):
-    pro_name = []
-    pro_used = []
-    processusage_object = []
-    prousage = Service.objects.all().values('ServiceName', 'HostName').annotate(max=Max('LastCheck'))\
-        .filter(ServiceName='total-procs',HostName__in=Host.objects.all().values('HostName'))
-    size = len(prousage)
-    p = re.compile(r'\d+')
-    insize = 0
-    for k in range(0, size):
-        temp = get_object_or_404(Service, HostName=prousage[k].get('HostName'), ServiceName='total-procs',
-                                 LastCheck=prousage[k].get('max'))
-        hosttype = get_object_or_404(Host, HostName=temp.HostName)
-        temp.HostType = hosttype.HostType
-        if temp.HostType == 'virtual':
-            pro_name.append(temp.HostName)
-            if temp.PerformanceData == '':
-                pro_used.append(0)
-            else:
-                pro_used.append(p.findall(temp.PerformanceData)[0])
-            processusage_dic = {'name': pro_name[insize], 'used': pro_used[insize]}
-            processusage_object.append(processusage_dic)
-            insize = insize + 1
-    return HttpResponse(json.dumps(processusage_object), content_type="application/json")
+    # Get parameters from URL
+    cur_page_no = request.GET.get('page')
+    item_per_page = request.GET.get('pageelem')
 
+    # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
+    if cur_page_no == None or cur_page_no == '':
+        cur_page_no = 1
+    elif cur_page_no <= 0:
+        cur_page_no = 1
+    else:
+        cur_page_no = int(cur_page_no)
+
+    if item_per_page == None or item_per_page == '':
+        item_per_page = 4
+    else:
+        item_per_page = int(item_per_page)
+        if item_per_page <= 4:
+            item_per_page = 4
+        elif item_per_page >= 10:
+            item_per_page = 4
+
+    my_host_list = Host.objects.all().values('HostName', 'HostType').filter(HostType = 'virtual')
+
+    host_count = len(my_host_list)
+    start_pos = 0
+    end_pos = 0
+
+    # Get start and end of consulting host
+    if (cur_page_no - 1) * item_per_page >= host_count:
+        start_pos = 0
+        if item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = item_per_page
+    else:
+        start_pos = (cur_page_no - 1) * item_per_page
+        if start_pos + item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = start_pos + item_per_page
+    print "start = " + str(start_pos) + ' | end = ' + str(end_pos)
+
+    pro_name = ''
+    pro_used = ''
+    pro_json_obj = []
+    # Get hosts' service records
+    for i in range(start_pos, end_pos):
+        # Get last check time for current host
+        latest_check = Service.objects.values('HostName').annotate(LastCheck = Max('LastCheck'))\
+            .filter(HostName = my_host_list[i].get('HostName'), ServiceName = 'total-procs')
+
+        # No record found.
+        if len(latest_check) == 0:
+            svc_rec_obj = None
+        else:
+            svc_rec_obj = get_object_or_404(Service, HostName = my_host_list[i].get('HostName'),ServiceName='total-procs',
+                                        LastCheck=latest_check[0].get('LastCheck'))
+
+        if svc_rec_obj == None:                               # Got no such host's record
+            pro_name = my_host_list[i].get('HostName')
+            pro_used = '0.0'
+        else:
+            pro_name = my_host_list[i].get('HostName')
+            if svc_rec_obj.PerformanceData == '':
+                pro_used = '0.0'
+            else:
+                p = re.compile(r'\d+')
+                pro_used = p.findall(svc_rec_obj.PerformanceData)[0]
+        json_data = {'name': pro_name, 'used': pro_used}
+        pro_json_obj.append(json_data)
+
+    return HttpResponse(json.dumps(pro_json_obj), content_type="application/json")
 
 def disk_physical(request):
-    diskusage_name = []
-    diskusage_used = []
-    diskusage_total = []
-    diskusage_object = []
-    diskusage = Service.objects.all().values('ServiceName', 'HostName').annotate(max=Max('LastCheck'))\
-        .filter(ServiceName='disk',HostName__in=Host.objects.all().values('HostName'))
-    size = len(diskusage)
-    p = re.compile(r'\d+')
-    insize = 0
-    for k in range(0, size):
-        temp = get_object_or_404(Service, HostName=diskusage[k].get('HostName'), ServiceName='disk',
-                                 LastCheck=diskusage[k].get('max'))
-        hosttype = get_object_or_404(Host, HostName=temp.HostName)
-        temp.HostType = hosttype.HostType
+    # Get parameters from URL
+    cur_page_no = request.GET.get('page')
+    item_per_page = request.GET.get('pageelem')
 
-        if temp.HostType == 'physical':
-            diskusage_name.append(temp.HostName)
-            if temp.PerformanceData == '':
-                diskusage_used.append(0)
-                diskusage_total.append(0)
+    # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
+    if cur_page_no == None or cur_page_no == '':
+        cur_page_no = 1
+    elif cur_page_no <= 0:
+        cur_page_no = 1
+    else:
+        cur_page_no = int(cur_page_no)
+
+    if item_per_page == None or item_per_page == '':
+        item_per_page = 4
+    else:
+        item_per_page = int(item_per_page)
+        if item_per_page <= 4:
+            item_per_page = 4
+        elif item_per_page >= 10:
+            item_per_page = 4
+
+    my_host_list = Host.objects.all().values('HostName', 'HostType').filter(HostType = 'physical')
+
+    host_count = len(my_host_list)
+    start_pos = 0
+    end_pos = 0
+    print "host_count = " + str(host_count)
+
+    # Get start and end of consulting host
+    if (cur_page_no - 1) * item_per_page >= host_count:
+        start_pos = 0
+        if item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = item_per_page
+    else:
+        start_pos = (cur_page_no - 1) * item_per_page
+        if start_pos + item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = start_pos + item_per_page
+    print "start = " + str(start_pos) + ' | end = ' + str(end_pos)
+
+    disk_name = ''
+    disk_used = ''
+    disk_total = ''
+    disk_percentage = 0
+    disk_json_obj = []
+    # Get hosts' service records
+    for i in range(start_pos, end_pos):
+        # Get last check time for current host
+        latest_check = Service.objects.values('HostName').annotate(LastCheck = Max('LastCheck'))\
+            .filter(HostName = my_host_list[i].get('HostName'), ServiceName = 'disk')
+
+        # No record found.
+        if len(latest_check) == 0:
+            svc_rec_obj = None
+        else:
+            svc_rec_obj = get_object_or_404(Service, HostName = my_host_list[i].get('HostName'),ServiceName='disk',
+                                        LastCheck=latest_check[0].get('LastCheck'))
+
+        if svc_rec_obj == None:                               # Got no such host's record
+            disk_name = my_host_list[i].get('HostName')
+            disk_used = 0
+            disk_total = 0
+            disk_percentage = 0
+        else:
+            disk_name = my_host_list[i].get('HostName')
+            if svc_rec_obj.PerformanceData == '':
+                disk_used = 0
+                disk_total = 0
+                disk_percentage = 0
             else:
-                diskusage_used.append(p.findall(temp.PerformanceData)[0])
-                diskusage_total.append(p.findall(temp.PerformanceData)[4])
-            if diskusage_total[k] == 0:
-                tem = 0
-            else:
-                tem = format(float(diskusage_used[insize]) / float(diskusage_total[insize]), '.2%')
+                p = re.compile(r'\d+')
+                disk_used = p.findall(svc_rec_obj.PerformanceData)[0]
+                disk_total = p.findall(svc_rec_obj.PerformanceData)[4]
+                if disk_total == 0:
+                    disk_percentage = 0
+                else:
+                    disk_percentage = format(float(disk_used) / float(disk_total), '.2%')
+        json_data = {'name': disk_name, 'used': disk_used, 'total': disk_total, 'percentage': disk_percentage}
+        disk_json_obj.append(json_data)
 
-            diskusage_dic = {'name': diskusage_name[insize], 'used': diskusage_used[insize],
-                             'total': diskusage_total[insize], 'percentage': tem}
-            diskusage_object.append(diskusage_dic)
-            insize = insize + 1
-    return HttpResponse(json.dumps(diskusage_object), content_type="application/json")
-
+    return HttpResponse(json.dumps(disk_json_obj), content_type="application/json")
 
 def disk_virtual(request):
-    diskusage_name = []
-    diskusage_used = []
-    diskusage_total = []
-    diskusage_object = []
-    diskusage = Service.objects.all().values('ServiceName', 'HostName').annotate(max=Max('LastCheck'))\
-        .filter(ServiceName='disk',HostName__in=Host.objects.all().values('HostName'))
-    size = len(diskusage)
-    p = re.compile(r'\d+')
-    insize = 0
-    for k in range(0, size):
-        temp = get_object_or_404(Service, HostName=diskusage[k].get('HostName'), ServiceName='disk',
-                                 LastCheck=diskusage[k].get('max'))
-        hosttype = get_object_or_404(Host, HostName=temp.HostName)
-        temp.HostType = hosttype.HostType
+    # Get parameters from URL
+    cur_page_no = request.GET.get('page')
+    item_per_page = request.GET.get('pageelem')
 
-        if temp.HostType == 'virtual':
-            diskusage_name.append(temp.HostName)
-            if temp.PerformanceData == '':
-                diskusage_used.append(0)
-                diskusage_total.append(0)
+    # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
+    if cur_page_no == None or cur_page_no == '':
+        cur_page_no = 1
+    elif cur_page_no <= 0:
+        cur_page_no = 1
+    else:
+        cur_page_no = int(cur_page_no)
+
+    if item_per_page == None or item_per_page == '':
+        item_per_page = 4
+    else:
+        item_per_page = int(item_per_page)
+        if item_per_page <= 4:
+            item_per_page = 4
+        elif item_per_page >= 10:
+            item_per_page = 4
+
+    my_host_list = Host.objects.all().values('HostName', 'HostType').filter(HostType = 'virtual')
+
+    host_count = len(my_host_list)
+    start_pos = 0
+    end_pos = 0
+    print "host_count = " + str(host_count)
+
+    # Get start and end of consulting host
+    if (cur_page_no - 1) * item_per_page >= host_count:
+        start_pos = 0
+        if item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = item_per_page
+    else:
+        start_pos = (cur_page_no - 1) * item_per_page
+        if start_pos + item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = start_pos + item_per_page
+    print "start = " + str(start_pos) + ' | end = ' + str(end_pos)
+
+    disk_name = ''
+    disk_used = ''
+    disk_total = ''
+    disk_percentage = 0
+    disk_json_obj = []
+    # Get hosts' service records
+    for i in range(start_pos, end_pos):
+        # Get last check time for current host
+        latest_check = Service.objects.values('HostName').annotate(LastCheck = Max('LastCheck'))\
+            .filter(HostName = my_host_list[i].get('HostName'), ServiceName = 'disk')
+
+        # No record found.
+        if len(latest_check) == 0:
+            svc_rec_obj = None
+        else:
+            svc_rec_obj = get_object_or_404(Service, HostName = my_host_list[i].get('HostName'),ServiceName='disk',
+                                        LastCheck=latest_check[0].get('LastCheck'))
+
+        if svc_rec_obj == None:                               # Got no such host's record
+            disk_name = my_host_list[i].get('HostName')
+            disk_used = 0
+            disk_total = 0
+            disk_percentage = 0
+        else:
+            disk_name = my_host_list[i].get('HostName')
+            if svc_rec_obj.PerformanceData == '':
+                disk_used = 0
+                disk_total = 0
+                disk_percentage = 0
             else:
-                diskusage_used.append(p.findall(temp.PerformanceData)[0])
-                diskusage_total.append(p.findall(temp.PerformanceData)[4])
-            if diskusage_total[insize] == 0:
-                tem = 0
-            else:
-                tem = format(float(diskusage_used[insize]) / float(diskusage_total[insize]), '.2%')
+                p = re.compile(r'\d+')
+                disk_used = p.findall(svc_rec_obj.PerformanceData)[0]
+                disk_total = p.findall(svc_rec_obj.PerformanceData)[4]
+                if disk_total == 0:
+                    disk_percentage = 0
+                else:
+                    disk_percentage = format(float(disk_used) / float(disk_total), '.2%')
+        json_data = {'name': disk_name, 'used': disk_used, 'total': disk_total, 'percentage': disk_percentage}
+        disk_json_obj.append(json_data)
 
-            diskusage_dic = {'name': diskusage_name[insize], 'used': diskusage_used[insize],
-                             'total': diskusage_total[insize], 'percentage': tem}
-            diskusage_object.append(diskusage_dic)
-            insize = insize + 1
-    return HttpResponse(json.dumps(diskusage_object), content_type="application/json")
-
+    return HttpResponse(json.dumps(disk_json_obj), content_type="application/json")
 
 def eth_physical(request):
-    eth_name = []
-    eth_in = []
-    eth_out = []
-    eth_object = []
-    eth = Service.objects.all().values('ServiceName', 'HostName').annotate(max=Max('LastCheck'))\
-        .filter(ServiceName='Traffic_eth0',HostName__in=Host.objects.all().values('HostName'))
-    size = len(eth)
-    p = re.compile(r'\d+')
-    insize = 0
-    for k in range(0, size):
-        temp = get_object_or_404(Service, HostName=eth[k].get('HostName'), ServiceName='Traffic_eth0',
-                                 LastCheck=eth[k].get('max'))
-        hosttype = get_object_or_404(Host, HostName=temp.HostName)
-        temp.HostType = hosttype.HostType
+    # Get parameters from URL
+    cur_page_no = request.GET.get('page')
+    item_per_page = request.GET.get('pageelem')
 
-        if temp.HostType == 'physical':
-            eth_name.append(temp.HostName)
-            if temp.PerformanceData == '':
-                eth_in.append(0)
-                eth_out.append(0)
+    # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
+    if cur_page_no == None or cur_page_no == '':
+        cur_page_no = 1
+    elif cur_page_no <= 0:
+        cur_page_no = 1
+    else:
+        cur_page_no = int(cur_page_no)
+
+    if item_per_page == None or item_per_page == '':
+        item_per_page = 4
+    else:
+        item_per_page = int(item_per_page)
+        if item_per_page <= 4:
+            item_per_page = 4
+        elif item_per_page >= 10:
+            item_per_page = 4
+
+    my_host_list = Host.objects.all().values('HostName', 'HostType').filter(HostType = 'physical')
+
+    host_count = len(my_host_list)
+    start_pos = 0
+    end_pos = 0
+    print "host_count = " + str(host_count)
+
+    # Get start and end of consulting host
+    if (cur_page_no - 1) * item_per_page >= host_count:
+        start_pos = 0
+        if item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = item_per_page
+    else:
+        start_pos = (cur_page_no - 1) * item_per_page
+        if start_pos + item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = start_pos + item_per_page
+    print "start = " + str(start_pos) + ' | end = ' + str(end_pos)
+
+    eth_name = ''
+    eth_in = ''
+    eth_out = ''
+    eth_json_obj = []
+    # Get hosts' service records
+    for i in range(start_pos, end_pos):
+        # Get last check time for current host
+        print my_host_list[i].get('HostName')
+        latest_check = Service.objects.values('HostName').annotate(last_check = Max('LastCheck'))\
+            .filter(HostName = my_host_list[i].get('HostName'), ServiceName = 'Traffic_eth0')
+        if len(latest_check) == 0:
+            svc_rec_obj = None
+        else:
+            svc_rec_obj = get_object_or_404(Service, HostName = my_host_list[i].get('HostName'),ServiceName='Traffic_eth0',
+                                        LastCheck=latest_check[0].get('last_check'))
+
+        if svc_rec_obj == None:                               # Got no such host's record
+            eth_name = my_host_list[i].get('HostName')
+            eth_in = 0
+            eth_out = 0
+        else:
+            eth_name = my_host_list[i].get('HostName')
+            if svc_rec_obj.PerformanceData == '':
+                eth_in = 0
+                eth_out = 0
             else:
-                eth_in.append(p.findall(temp.PerformanceData)[0])
-                eth_out.append(p.findall(temp.PerformanceData)[5])
-            eth_dic = {'name': eth_name[insize], 'in': eth_in[insize], 'out': eth_out[insize]}
-            eth_object.append(eth_dic)
-            insize = insize + 1
-    return HttpResponse(json.dumps(eth_object), content_type="application/json")
+                p = re.compile(r'\d+')
+                eth_in = p.findall(svc_rec_obj.PerformanceData)[0]
+                eth_out = p.findall(svc_rec_obj.PerformanceData)[5]
+        json_data = {'name': eth_name, 'in': eth_in, 'out': eth_out}
+        eth_json_obj.append(json_data)
 
+    return HttpResponse(json.dumps(eth_json_obj), content_type="application/json")
 
 def eth_virtual(request):
-    eth_name = []
-    eth_in = []
-    eth_out = []
-    eth_object = []
-    eth = Service.objects.all().values('ServiceName', 'HostName').annotate(max=Max('LastCheck'))\
-        .filter(ServiceName='Traffic_eth0',HostName__in=Host.objects.all().values('HostName'))
-    size = len(eth)
-    p = re.compile(r'\d+')
-    insize = 0
-    for k in range(0, size):
-        temp = get_object_or_404(Service, HostName=eth[k].get('HostName'), ServiceName='Traffic_eth0',
-                                 LastCheck=eth[k].get('max'))
-        hosttype = get_object_or_404(Host, HostName=temp.HostName)
-        temp.HostType = hosttype.HostType
+    # Get parameters from URL
+    cur_page_no = request.GET.get('page')
+    item_per_page = request.GET.get('pageelem')
 
-        if temp.HostType == 'virtual':
-            eth_name.append(temp.HostName)
-            if temp.PerformanceData == '':
-                eth_in.append(0)
-                eth_out.append(0)
+    # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
+    if cur_page_no == None or cur_page_no == '':
+        cur_page_no = 1
+    elif cur_page_no <= 0:
+        cur_page_no = 1
+    else:
+        cur_page_no = int(cur_page_no)
+
+    if item_per_page == None or item_per_page == '':
+        item_per_page = 4
+    else:
+        item_per_page = int(item_per_page)
+        if item_per_page <= 4:
+            item_per_page = 4
+        elif item_per_page >= 10:
+            item_per_page = 4
+
+    my_host_list = Host.objects.all().values('HostName', 'HostType').filter(HostType = 'virtual')
+
+    host_count = len(my_host_list)
+    start_pos = 0
+    end_pos = 0
+    print "host_count = " + str(host_count)
+
+    # Get start and end of consulting host
+    if (cur_page_no - 1) * item_per_page >= host_count:
+        start_pos = 0
+        if item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = item_per_page
+    else:
+        start_pos = (cur_page_no - 1) * item_per_page
+        if start_pos + item_per_page > host_count:
+            end_pos = host_count
+        else:
+            end_pos = start_pos + item_per_page
+    print "start = " + str(start_pos) + ' | end = ' + str(end_pos)
+
+    eth_name = ''
+    eth_in = ''
+    eth_out = ''
+    eth_json_obj = []
+    # Get hosts' service records
+    for i in range(start_pos, end_pos):
+        # Get last check time for current host
+        print my_host_list[i].get('HostName')
+        latest_check = Service.objects.values('HostName').annotate(last_check = Max('LastCheck'))\
+            .filter(HostName = my_host_list[i].get('HostName'), ServiceName = 'Traffic_eth0')
+        if len(latest_check) == 0:
+            svc_rec_obj = None
+        else:
+            svc_rec_obj = get_object_or_404(Service, HostName = my_host_list[i].get('HostName'),ServiceName='Traffic_eth0',
+                                        LastCheck=latest_check[0].get('last_check'))
+
+        if svc_rec_obj == None:                               # Got no such host's record
+            eth_name = my_host_list[i].get('HostName')
+            eth_in = 0
+            eth_out = 0
+        else:
+            eth_name = my_host_list[i].get('HostName')
+            if svc_rec_obj.PerformanceData == '':
+                eth_in = 0
+                eth_out = 0
             else:
-                eth_in.append(p.findall(temp.PerformanceData)[0])
-                eth_out.append(p.findall(temp.PerformanceData)[5])
-            eth_dic = {'name': eth_name[insize], 'in': eth_in[insize], 'out': eth_out[insize]}
-            eth_object.append(eth_dic)
-            insize = insize + 1
-    return HttpResponse(json.dumps(eth_object), content_type="application/json")
+                p = re.compile(r'\d+')
+                eth_in = p.findall(svc_rec_obj.PerformanceData)[0]
+                eth_out = p.findall(svc_rec_obj.PerformanceData)[5]
+        json_data = {'name': eth_name, 'in': eth_in, 'out': eth_out}
+        eth_json_obj.append(json_data)
 
+    return HttpResponse(json.dumps(eth_json_obj), content_type="application/json")
 
 def totalcompare(request):
     monitoring_host = Host.objects.all().values('HostName')
