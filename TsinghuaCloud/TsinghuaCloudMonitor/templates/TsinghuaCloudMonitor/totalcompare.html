@@ -112,9 +112,29 @@
     <a href="/totalcompare" class="easyui-linkbutton" style="width:130px">全局监控</a>
 </div>
 <div data-options="region:'center',title:'全局监控图'" style="background:#F0F0F0;position:relative;">
+<div style="color:#000066;padding-left: 10px">
     <a id="physical" class="easyui-linkbutton" style="width:130px">物理机</a>
     <a id="virtual" class="easyui-linkbutton" style="width:130px">虚拟机</a>
-
+    <a style="padding-left: 100px color:#000000">第</a>
+    <input id="page-num" style="width:50px"/>
+    <a stype="color:#000000">页</a>
+    <a style="padding-left: 10px; color:#000000">每页显示条数(4-10)</a>
+    <input id="item-per-page" style="width:50px"/>
+    <a id="page-change" class="easyui-linkbutton" style="width:50px">确认</a>
+</div>
+    <script type="text/javascript">
+        filter_string = ''
+        $("#page-change").click(function () {
+            var pageno = $("#page-num").val();
+            var itemperpage = $("#item-per-page").val();
+            filter_string = "?page=" + pageno + "&pageelem=" + itemperpage;
+            action();
+            cpu();
+            pro();
+            disk();
+            eth();
+        });
+    </script>
     <div style="position:relative;height:600px;width:1300px">
         <div id="memoryusage"
              style="height:600px;width:1000px;position:absolute;top:0;left:0; border:2px solid;border-color:#666666; "></div>
@@ -203,7 +223,7 @@
         action = function () {
             if (choice == 0) {
                 $.ajax({
-                    url: '/memory_physical/',
+                    url: '/memory_physical/' + filter_string,
                     success: function (result) {
                         if (result.length != 0) {
                             var memory_used_all = 0;
@@ -273,7 +293,7 @@
             ;
             if (choice == 1) {
                 $.ajax({
-                    url: '/memory_virtual/',
+                    url: '/memory_virtual/' + filter_string,
                     success: function (result) {
                         if (result.length != 0) {
                             var memory_used_all = 0;
@@ -504,7 +524,7 @@
         cpu = function () {
             if (choice == 0) {
                 $.ajax({
-                    url: '/cpu_physical/',
+                    url: '/cpu_physical/' + filter_string,
                     success: function (result) {
                         if (result.length != 0) {
                             var cpuuse_name = [];
@@ -555,7 +575,7 @@
             ;
             if (choice == 1) {
                 $.ajax({
-                    url: '/cpu_virtual/',
+                    url: '/cpu_virtual/' + filter_string,
                     success: function (result) {
                         if (result.length != 0) {
                             var cpuuse_name = [];
@@ -750,7 +770,7 @@
         disk = function () {
             if (choice == 0) {
                 $.ajax({
-                    url: '/disk_physical/',
+                    url: '/disk_physical/' + filter_string,
                     success: function (result) {
                         if (result.length != 0) {
                             var disk_used_all = 0;
@@ -814,7 +834,7 @@
             ;
             if (choice == 1) {
                 $.ajax({
-                    url: '/disk_virtual/',
+                    url: '/disk_virtual/' + filter_string,
                     success: function (result) {
                         if (result.length != 0) {
                             var disk_used_all = 0;
@@ -1045,7 +1065,7 @@
         pro = function () {
             if (choice == 0) {
                 $.ajax({
-                    url: '/pro_physical/',
+                    url: '/pro_physical/' + filter_string,
                     success: function (result) {
                         if (result.length != 0) {
                             var prouse_name = [];
@@ -1092,7 +1112,7 @@
             ;
             if (choice == 1) {
                 $.ajax({
-                    url: '/pro_virtual/',
+                    url: '/pro_virtual/' + filter_string,
                     success: function (result) {
                         if (result.length != 0) {
                             var prouse_name = [];
@@ -1263,7 +1283,7 @@
         eth = function () {
             if (choice == 0) {
                 $.ajax({
-                    url: '/eth_physical/',
+                    url: '/eth_physical/' + filter_string,
                     success: function (result) {
                         if (result.length != 0) {
                             var eth_in = [];
@@ -1315,7 +1335,7 @@
             ;
             if (choice == 1) {
                 $.ajax({
-                    url: '/eth_virtual/',
+                    url: '/eth_virtual/' + filter_string,
                     success: function (result) {
                         if (result.length != 0) {
                             var eth_in = [];

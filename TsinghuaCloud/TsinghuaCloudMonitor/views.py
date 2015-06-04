@@ -215,14 +215,19 @@ def memory_physical(request):
     item_per_page = request.GET.get('pageelem')
 
     # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
-    if cur_page_no == None or cur_page_no == '':
+    if cur_page_no == None:
+        cur_page_no = 1
+    elif cur_page_no == '':
         cur_page_no = 1
     elif cur_page_no <= 0:
         cur_page_no = 1
     else:
         cur_page_no = int(cur_page_no)
 
-    if item_per_page == None or item_per_page == '':
+    # Get a correct item_per_page
+    if item_per_page == None:
+        item_per_page = 4
+    elif item_per_page == '':
         item_per_page = 4
     else:
         item_per_page = int(item_per_page)
@@ -302,14 +307,19 @@ def memory_virtual(request):
     item_per_page = request.GET.get('pageelem')
 
     # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
-    if cur_page_no == None or cur_page_no == '':
+    if cur_page_no == None:
+        cur_page_no = 1
+    elif cur_page_no == '':
         cur_page_no = 1
     elif cur_page_no <= 0:
         cur_page_no = 1
     else:
         cur_page_no = int(cur_page_no)
 
-    if item_per_page == None or item_per_page == '':
+    # Get a correct item_per_page
+    if item_per_page == None:
+        item_per_page = 4
+    elif item_per_page == '':
         item_per_page = 4
     else:
         item_per_page = int(item_per_page)
@@ -389,14 +399,19 @@ def cpu_physical(request):
     item_per_page = request.GET.get('pageelem')
 
     # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
-    if cur_page_no == None or cur_page_no == '':
+    if cur_page_no == None:
+        cur_page_no = 1
+    elif cur_page_no == '':
         cur_page_no = 1
     elif cur_page_no <= 0:
         cur_page_no = 1
     else:
         cur_page_no = int(cur_page_no)
 
-    if item_per_page == None or item_per_page == '':
+    # Get a correct item_per_page
+    if item_per_page == None:
+        item_per_page = 4
+    elif item_per_page == '':
         item_per_page = 4
     else:
         item_per_page = int(item_per_page)
@@ -468,14 +483,19 @@ def cpu_virtual(request):
     item_per_page = request.GET.get('pageelem')
 
     # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
-    if cur_page_no == None or cur_page_no == '':
+    if cur_page_no == None:
+        cur_page_no = 1
+    elif cur_page_no == '':
         cur_page_no = 1
     elif cur_page_no <= 0:
         cur_page_no = 1
     else:
         cur_page_no = int(cur_page_no)
 
-    if item_per_page == None or item_per_page == '':
+    # Get a correct item_per_page
+    if item_per_page == None:
+        item_per_page = 4
+    elif item_per_page == '':
         item_per_page = 4
     else:
         item_per_page = int(item_per_page)
@@ -547,14 +567,19 @@ def pro_physical(request):
     item_per_page = request.GET.get('pageelem')
 
     # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
-    if cur_page_no == None or cur_page_no == '':
+    if cur_page_no == None:
+        cur_page_no = 1
+    elif cur_page_no == '':
         cur_page_no = 1
     elif cur_page_no <= 0:
         cur_page_no = 1
     else:
         cur_page_no = int(cur_page_no)
 
-    if item_per_page == None or item_per_page == '':
+    # Get a correct item_per_page
+    if item_per_page == None:
+        item_per_page = 4
+    elif item_per_page == '':
         item_per_page = 4
     else:
         item_per_page = int(item_per_page)
@@ -620,14 +645,19 @@ def pro_virtual(request):
     item_per_page = request.GET.get('pageelem')
 
     # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
-    if cur_page_no == None or cur_page_no == '':
+    if cur_page_no == None:
+        cur_page_no = 1
+    elif cur_page_no == '':
         cur_page_no = 1
     elif cur_page_no <= 0:
         cur_page_no = 1
     else:
         cur_page_no = int(cur_page_no)
 
-    if item_per_page == None or item_per_page == '':
+    # Get a correct item_per_page
+    if item_per_page == None:
+        item_per_page = 4
+    elif item_per_page == '':
         item_per_page = 4
     else:
         item_per_page = int(item_per_page)
@@ -694,14 +724,19 @@ def disk_physical(request):
     item_per_page = request.GET.get('pageelem')
 
     # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
-    if cur_page_no == None or cur_page_no == '':
+    if cur_page_no == None:
+        cur_page_no = 1
+    elif cur_page_no == '':
         cur_page_no = 1
     elif cur_page_no <= 0:
         cur_page_no = 1
     else:
         cur_page_no = int(cur_page_no)
 
-    if item_per_page == None or item_per_page == '':
+    # Get a correct item_per_page
+    if item_per_page == None:
+        item_per_page = 4
+    elif item_per_page == '':
         item_per_page = 4
     else:
         item_per_page = int(item_per_page)
@@ -780,14 +815,19 @@ def disk_virtual(request):
     item_per_page = request.GET.get('pageelem')
 
     # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
-    if cur_page_no == None or cur_page_no == '':
+    if cur_page_no == None:
+        cur_page_no = 1
+    elif cur_page_no == '':
         cur_page_no = 1
     elif cur_page_no <= 0:
         cur_page_no = 1
     else:
         cur_page_no = int(cur_page_no)
 
-    if item_per_page == None or item_per_page == '':
+    # Get a correct item_per_page
+    if item_per_page == None:
+        item_per_page = 4
+    elif item_per_page == '':
         item_per_page = 4
     else:
         item_per_page = int(item_per_page)
@@ -866,14 +906,19 @@ def eth_physical(request):
     item_per_page = request.GET.get('pageelem')
 
     # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
-    if cur_page_no == None or cur_page_no == '':
+    if cur_page_no == None:
+        cur_page_no = 1
+    elif cur_page_no == '':
         cur_page_no = 1
     elif cur_page_no <= 0:
         cur_page_no = 1
     else:
         cur_page_no = int(cur_page_no)
 
-    if item_per_page == None or item_per_page == '':
+    # Get a correct item_per_page
+    if item_per_page == None:
+        item_per_page = 4
+    elif item_per_page == '':
         item_per_page = 4
     else:
         item_per_page = int(item_per_page)
@@ -944,14 +989,19 @@ def eth_virtual(request):
     item_per_page = request.GET.get('pageelem')
 
     # Get a correct page no, filterby_user(if needed), item_per_page(if needed)
-    if cur_page_no == None or cur_page_no == '':
+    if cur_page_no == None:
+        cur_page_no = 1
+    elif cur_page_no == '':
         cur_page_no = 1
     elif cur_page_no <= 0:
         cur_page_no = 1
     else:
         cur_page_no = int(cur_page_no)
 
-    if item_per_page == None or item_per_page == '':
+    # Get a correct item_per_page
+    if item_per_page == None:
+        item_per_page = 4
+    elif item_per_page == '':
         item_per_page = 4
     else:
         item_per_page = int(item_per_page)
