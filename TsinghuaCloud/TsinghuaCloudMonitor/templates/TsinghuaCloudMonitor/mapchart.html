@@ -194,14 +194,14 @@ function createSubGroup(x, y, renderColor,name,id){
 function directSubmap(id){
 
             
-            window.location.href= 'request/'+id;
+            window.location.href= '../request/'+id;
 
    
 }
 
 tenants= function (){
  $.ajax({
-               url:'tenants/',
+               url:'../tenants/',
                success: function(result){
                         var len = result['projects'].length;
                         console.info(result);
